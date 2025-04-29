@@ -10,7 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.quittungsscanner.ui.main.Screens
+import com.example.quittungsscanner.ui.Screens.Screens
 
 @Composable
 fun BandScreen(bandsViewModel: BandsViewModel, navController: NavController) {

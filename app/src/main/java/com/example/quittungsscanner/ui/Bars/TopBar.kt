@@ -1,4 +1,4 @@
-package com.example.quittungsscanner.ui.main
+package com.example.quittungsscanner.ui.Bars
 
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.quittungsscanner.components.MusicPlayerService
 import com.example.quittungsscanner.exp
 import com.example.quittungsscanner.lvl
+import com.example.quittungsscanner.ui.Screens.Screens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,16 +87,4 @@ fun CustomTopBar(navController: NavController) {
         modifier = Modifier.background(MaterialTheme.colorScheme.primary),
         colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
     )
-}
-
-@Composable
-fun ShowLevelBar() {
-    val totalPositions = (3 + 1.5 * lvl).toInt()
-
-    val filledPositions = (exp / 100).coerceAtMost(totalPositions)
-    val emptyPositions = totalPositions - filledPositions
-
-    val expBar = "#".repeat(filledPositions) + "-".repeat(emptyPositions)
-
-    Text(text = "[$expBar] $exp/${100 * totalPositions} XP")
 }

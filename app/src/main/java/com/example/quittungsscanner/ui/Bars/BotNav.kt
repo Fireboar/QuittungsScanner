@@ -1,5 +1,6 @@
-package com.example.quittungsscanner.ui.main
+package com.example.quittungsscanner.ui.Bars
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -13,8 +14,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.compose.ui.Modifier
+
 
 data class BottomNavigationItem(
     val route: String,
@@ -32,7 +36,7 @@ fun BottomNavigation(
 ){
     var selectedItem by remember {mutableIntStateOf(0)}
 
-    NavigationBar {
+    NavigationBar{
         items.forEachIndexed {index, item ->
             NavigationBarItem(
                 selected = index == selectedItem,
@@ -44,7 +48,11 @@ fun BottomNavigation(
                     }
                 },
                 label = {
-                    Text(item.title)
+                    Text(
+                        item.title,
+                        maxLines = 1,
+                        softWrap = false
+                    )
                 },
                 icon = {
                     BadgedBox(
@@ -70,7 +78,8 @@ fun BottomNavigation(
                             } else {
                                 item.unselectedIcon
                             },
-                            contentDescription = item.title
+                            contentDescription = item.title,
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                 }

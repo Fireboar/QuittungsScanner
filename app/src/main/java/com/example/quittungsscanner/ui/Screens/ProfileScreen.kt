@@ -1,19 +1,17 @@
-package com.example.quittungsscanner.ui.main
+package com.example.quittungsscanner.ui.Screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.example.quittungsscanner.lvl
 
 @Composable
-fun ProfileScreen(exp: Int, gold: Int) {
+fun ProfileScreen() {
     Box(modifier = Modifier.padding(20.dp)) {
         Column {
             AsyncImage(
@@ -22,19 +20,6 @@ fun ProfileScreen(exp: Int, gold: Int) {
                 contentDescription = "null"
             )
             Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "Name: Katarina",
-            )
-            Text(
-                text = "Exp: $exp",
-            )
-            Text(
-                text = "Gold: $gold",
-            )
-            Text(
-                text = "Level: $lvl",
-            )
-            ShowLevelBar()
         }
     }
 }

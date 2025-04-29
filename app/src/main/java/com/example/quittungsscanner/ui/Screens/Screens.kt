@@ -1,4 +1,4 @@
-package com.example.quittungsscanner.ui.main
+package com.example.quittungsscanner.ui.Screens
 
 enum class Screens {
     Home,

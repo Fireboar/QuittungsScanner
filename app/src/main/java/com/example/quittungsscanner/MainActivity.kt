@@ -11,16 +11,15 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.InsertChart
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.InsertChart
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Receipt
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,11 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.quittungsscanner.data.user.UserViewModel
 import com.example.quittungsscanner.ui.bands.BandsViewModel
-import com.example.quittungsscanner.ui.main.BottomNavigation
-import com.example.quittungsscanner.ui.main.BottomNavigationItem
-import com.example.quittungsscanner.ui.main.CustomTopBar
-import com.example.quittungsscanner.ui.main.MyNavHost
-import com.example.quittungsscanner.ui.main.Screens
+import com.example.quittungsscanner.ui.Bars.BottomNavigation
+import com.example.quittungsscanner.ui.Bars.BottomNavigationItem
+import com.example.quittungsscanner.ui.Bars.CustomTopBar
+import com.example.quittungsscanner.ui.Screens.Screens
 import com.example.quittungsscanner.ui.theme.QuittungsScannerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -96,7 +94,15 @@ class MainActivity : ComponentActivity() {
                         selectedIcon = Icons.Filled.Receipt,
                         unselectedIcon = Icons.Outlined.Receipt,
                         hasNews = false,
-                    )
+                    ),
+                    BottomNavigationItem(
+                        route = Screens.Profil.name,
+                        title = Screens.Profil.name,
+                        selectedIcon = Icons.Filled.Person,
+                        unselectedIcon = Icons.Outlined.Person,
+                        hasNews = false,
+                    ),
+
                 )
 
                 val navController = rememberNavController()
