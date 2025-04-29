@@ -26,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.quittungsscanner.data.user.UserViewModel
-import com.example.quittungsscanner.ui.bands.BandsViewModel
 import com.example.quittungsscanner.ui.Bars.BottomNavigation
 import com.example.quittungsscanner.ui.Bars.BottomNavigationItem
 import com.example.quittungsscanner.ui.Bars.CustomTopBar
@@ -56,15 +55,6 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            // UserCount
-            val userViewModel: UserViewModel by viewModels()
-            val userList by userViewModel.getUsers().collectAsState(initial = emptyList())
-            val userCount = userList.size
-
-            // BandCount
-            val bandsViewModel: BandsViewModel by viewModels()
-            val bandCount by bandsViewModel.bandCount.collectAsState()
-
             QuittungsScannerTheme {
                 val navigationItems = listOf(
                     BottomNavigationItem(
@@ -89,8 +79,8 @@ class MainActivity : ComponentActivity() {
                         hasNews = false,
                     ),
                     BottomNavigationItem(
-                        route = Screens.Quittungen.name,
-                        title = Screens.Quittungen.name,
+                        route = Screens.Receipt.name,
+                        title = Screens.Receipt.name,
                         selectedIcon = Icons.Filled.Receipt,
                         unselectedIcon = Icons.Outlined.Receipt,
                         hasNews = false,

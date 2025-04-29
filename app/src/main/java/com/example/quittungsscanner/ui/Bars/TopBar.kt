@@ -53,37 +53,6 @@ fun CustomTopBar(navController: NavController) {
                 )
             }
         },
-        actions = {
-            if (screenName == Screens.Components.name) {
-                // Play Button (Start service)
-                IconButton(
-                    onClick = {
-                        val intent = Intent(context, MusicPlayerService::class.java)
-                        context.startService(intent)
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.PlayArrow,
-                        contentDescription = "Start Service",
-                        tint = Color.White
-                    )
-                }
-
-                // Stop Button (Stop service)
-                IconButton(
-                    onClick = {
-                        val intent = Intent(context, MusicPlayerService::class.java)
-                        context.stopService(intent)
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        contentDescription = "Stop Service",
-                        tint = Color.White
-                    )
-                }
-            }
-        },
         modifier = Modifier.background(MaterialTheme.colorScheme.primary),
         colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
     )
