@@ -10,11 +10,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.InsertChart
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.InsertChart
+import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
@@ -30,6 +35,7 @@ import com.example.quittungsscanner.ui.main.MyNavHost
 import com.example.quittungsscanner.ui.main.Screens
 import com.example.quittungsscanner.ui.theme.QuittungsScannerTheme
 import dagger.hilt.android.AndroidEntryPoint
+
 
 var lvl = 3
 var exp = 200
@@ -68,23 +74,28 @@ class MainActivity : ComponentActivity() {
                         title = Screens.Home.name,
                         selectedIcon = Icons.Filled.Home,
                         unselectedIcon = Icons.Outlined.Home,
-                        hasNews = bandCount > 0,
-                        badgeCount = bandCount
-                    ),
-                    BottomNavigationItem(
-                        route = Screens.Components.name,
-                        title = Screens.Components.name,
-                        selectedIcon = Icons.Filled.Star,
-                        unselectedIcon = Icons.Outlined.Star,
                         hasNews = false,
                     ),
                     BottomNavigationItem(
-                        route = Screens.Users.name,
-                        title = Screens.Users.name,
-                        selectedIcon = Icons.Filled.Face,
-                        unselectedIcon = Icons.Outlined.Face,
-                        hasNews = userCount > 0,
-                        badgeCount = userCount
+                        route = Screens.Auswertungen.name,
+                        title = Screens.Auswertungen.name,
+                        selectedIcon = Icons.Filled.InsertChart,
+                        unselectedIcon = Icons.Outlined.InsertChart,
+                        hasNews = false,
+                    ),
+                    BottomNavigationItem(
+                        route = Screens.AddQuittung.name,
+                        title = Screens.AddQuittung.name,
+                        selectedIcon = Icons.Filled.Add,
+                        unselectedIcon = Icons.Outlined.Add,
+                        hasNews = false,
+                    ),
+                    BottomNavigationItem(
+                        route = Screens.Quittungen.name,
+                        title = Screens.Quittungen.name,
+                        selectedIcon = Icons.Filled.Receipt,
+                        unselectedIcon = Icons.Outlined.Receipt,
+                        hasNews = false,
                     )
                 )
 

@@ -1,9 +1,8 @@
 package com.example.quittungsscanner.ui.main
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 
 @Composable
-fun HomeScreen(navHostController: NavHostController) {
+fun Quittungen(){
 
 }

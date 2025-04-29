@@ -35,45 +35,23 @@ fun MyNavHost(
         modifier = modifier
 
     ) {
-        composable(
-            route = "${Screens.Profil.name}/{exp}/{gold}",
-            enterTransition = { slideInAnimation },
-            exitTransition = { slideOutAnimation },
-            arguments = listOf(
-                navArgument("exp") {
-                    type = NavType.IntType
-                },
-                navArgument("gold") {
-                    type = NavType.IntType
-                }
-            )
-        ) { navBackStackEntry ->
-            val exp = navBackStackEntry.arguments?.getInt("exp") ?: 0
-            val gold = navBackStackEntry.arguments?.getInt("gold") ?: 0
-            ProfileScreen(exp = exp, gold = gold)
-        }
         composable(route = Screens.Home.name) {
             HomeScreen(navHostController)
         }
         composable(
-            route = Screens.Game.name,
+            route = Screens.Auswertungen.name,
         ) {
-            GameScreen()
+            AuswertungenScreen()
         }
         composable(
-            route = Screens.Users.name,
+            route = Screens.AddQuittung.name,
         ) {
-            UserScreen()
+            AddQuittung()
         }
         composable(
-            route = Screens.Bands.name,
+            route = Screens.Quittungen.name,
         ) {
-            BandScreen(bandsViewModel, navHostController)
-        }
-        composable(
-            route = Screens.Components.name,
-        ) {
-            ComponentScreen()
+            Quittungen()
         }
         composable(
             route = "${Screens.BandInfo.name}/{bandNumber}",
