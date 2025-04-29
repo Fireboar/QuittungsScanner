@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.quittungsscanner.ui.Screens.AddQuittungScreen
+import com.example.quittungsscanner.ui.Screens.AddReceiptScreen
 import com.example.quittungsscanner.ui.Screens.AuswertungenScreen
 import com.example.quittungsscanner.ui.Screens.HomeScreen
 import com.example.quittungsscanner.ui.Screens.ProfileScreen
@@ -41,7 +41,7 @@ fun MyNavHost(
         composable(
             route = Screens.AddQuittung.name,
         ) {
-            AddQuittungScreen()
+            AddReceiptScreen()
         }
         composable(
             route = Screens.Receipt.name,

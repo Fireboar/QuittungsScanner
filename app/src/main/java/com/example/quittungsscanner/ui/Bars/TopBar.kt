@@ -1,11 +1,8 @@
 package com.example.quittungsscanner.ui.Bars
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,10 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.quittungsscanner.components.MusicPlayerService
-import com.example.quittungsscanner.exp
-import com.example.quittungsscanner.lvl
-import com.example.quittungsscanner.ui.Screens.Screens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

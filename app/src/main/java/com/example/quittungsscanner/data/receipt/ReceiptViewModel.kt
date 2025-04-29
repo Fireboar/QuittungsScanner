@@ -1,34 +1,35 @@
 package com.example.quittungsscanner.data.receipt
 
+import android.graphics.Bitmap
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quittungsscanner.data.database.UserDao
-import com.example.quittungsscanner.data.database.UserEntity
-import com.example.quittungsscanner.data.user.User
+import com.googlecode.tesseract.android.TessBaseAPI
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.sql.Timestamp
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-/*
+
 @HiltViewModel
 class ReceiptViewModel @Inject constructor(
-    private val userDao: UserDao
-): ViewModel() {
+    private val tessBaseAPI: TessBaseAPI
+) : ViewModel() {
 
-    fun addReceipt(receipt: Receipt) {
+    var recognizedText by mutableStateOf("")
+        private set
+
+    // Beispiel für OCR-Erkennung
+    fun scanReceipt(bitmap: Bitmap) {
         viewModelScope.launch {
-            userDao.insertReceipt()
+            recognizedText = withContext(Dispatchers.IO) {
+                tessBaseAPI.setImage(bitmap)
+                tessBaseAPI.utF8Text
+            }
         }
     }
-
-    fun getReceipt(): Flow<List<UserEntity>> {
-        return userDao.flowLoadAllUsers()
-    }
 }
-
-data class Receipt(
-    val timestamp: Timestamp,
-    var items:Items
-)*/

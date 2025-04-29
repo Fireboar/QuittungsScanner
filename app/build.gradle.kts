@@ -78,4 +78,10 @@ dependencies {
     ksp(libs.dagger.hilt.compiler)
     implementation(libs.androidx.hilt.navigation)
     implementation(libs.androidx.material.icons.extended)
+    implementation (libs.text.recognition)
+    implementation (libs.androidx.activity.ktx)
+    implementation (libs.kotlinx.coroutines.play.services)
+    //Scanning
+
+    implementation (libs.tess.two)
 }
