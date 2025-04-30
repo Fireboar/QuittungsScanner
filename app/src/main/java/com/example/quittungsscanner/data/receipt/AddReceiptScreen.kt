@@ -70,7 +70,7 @@ fun AddReceiptScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Zeige den erkannten Text
+
         Text("Erkannter Text: $recognizedText")
     }
 }

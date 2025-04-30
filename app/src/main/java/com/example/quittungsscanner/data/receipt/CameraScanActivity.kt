@@ -1,8 +1,5 @@
 package com.example.quittungsscanner.data.receipt
 
-import androidx.activity.viewModels
-import com.example.quittungsscanner.data.receipt.ReceiptViewModel
-import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -10,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -18,19 +16,26 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicText
+import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.core.app.ActivityCompat
-import androidx.camera.view.PreviewView
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
@@ -135,14 +140,12 @@ class CameraScanActivity : ComponentActivity() {
 
     @Composable
     fun CameraScanScreen() {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(16.dp)
         ) {
-            // PreviewView anzeigen
+            // Kamera-Vorschau
             AndroidView(
                 factory = { context ->
                     PreviewView(context).apply {
@@ -151,47 +154,58 @@ class CameraScanActivity : ComponentActivity() {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(400.dp)
+                    .align(Alignment.TopCenter)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // 🔴 Horizontale Hilfslinie in der Mitte des Kamera-Previews
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .align(Alignment.TopCenter)  // An den Kamera-Bereich anpassen
+                    .padding(top = 200.dp)       // -> halbe Höhe des Kamera-Bereichs (400dp)
+                    .background(androidx.compose.ui.graphics.Color.Red)
+            )
 
-            // Start- und Stop-Buttons steuern
-            Button(onClick = {
-                if (!isScanning) {
-                    isScanning = true
-                    startCamera()  // Kamera starten
-                    Toast.makeText(this@CameraScanActivity, "Scan gestartet", Toast.LENGTH_SHORT).show()
+            // UI-Buttons unten anzeigen
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(onClick = {
+                    if (!isScanning) {
+                        isScanning = true
+                        startCamera()
+                        Toast.makeText(this@CameraScanActivity, "Scan gestartet", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Text("Start Scan")
                 }
-            }) {
-                Text(text = "Start Scan")
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = {
-                if (isScanning) {
-                    isScanning = false
-                    camera?.cameraControl?.enableTorch(false)
+                Button(onClick = {
+                    if (isScanning) {
+                        isScanning = false
+                        camera?.cameraControl?.enableTorch(false)
 
-                    // Gib den erkannten Text an die vorherige Activity zurück
-                    val resultIntent = Intent()
-                    resultIntent.putExtra("recognized_text", recognizedText)
-                    setResult(RESULT_OK, resultIntent)
+                        val resultIntent = Intent()
+                        resultIntent.putExtra("recognized_text", recognizedText)
+                        setResult(RESULT_OK, resultIntent)
 
-                    Toast.makeText(this@CameraScanActivity, "Scan gestoppt", Toast.LENGTH_SHORT).show()
-                    finish()
+                        Toast.makeText(this@CameraScanActivity, "Scan gestoppt", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                }) {
+                    Text("Stop Scan")
                 }
-            }) {
-                Text(text = "Stop Scan")
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Zeige den erkannten Text
-            Text("Erkannter Text: $recognizedText")
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
