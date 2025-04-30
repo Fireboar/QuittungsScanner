@@ -84,4 +84,5 @@ dependencies {
     //Scanning
 
     implementation (libs.tess.two)
+
 }
