@@ -2,11 +2,9 @@ package com.example.quittungsscanner.data.receipt
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,46 +23,60 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.TextRecognizer
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 @Composable
-fun AddReceiptScreen(viewModel: ReceiptViewModel = hiltViewModel()){
+fun AddReceiptScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
     val context = LocalContext.current
     var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var recognizedText by remember { mutableStateOf("") }
 
-    // Launcher für die Kamera, um ein Bild aufzunehmen
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview(),
-        onResult = { bitmap ->
-            bitmap?.let {
-                imageBitmap = it
-                viewModel.scanReceipt(it)  // OCR-Verarbeitung
+    // Funktion zur kontinuierlichen Texterkennung
+    fun processDocumentScan(bitmap: Bitmap) {
+        val options = TextRecognizerOptions.Builder().build()
+        val recognizer: TextRecognizer = TextRecognition.getClient(options)
+        val inputImage = InputImage.fromBitmap(bitmap, 0)
+
+        recognizer.process(inputImage)
+            .addOnSuccessListener { visionText ->
+                val newText = visionText.text
+                recognizedText = newText // Update des erkannten Textes
             }
-        }
-    )
+            .addOnFailureListener { e ->
+                // Fehlerbehandlung, falls OCR fehlschlägt
+            }
+    }
 
     Column {
         // Zeige das Bild an, wenn es verfügbar ist
         imageBitmap?.let {
-            Image(bitmap = it.asImageBitmap(), contentDescription = "Receipt Image")
+            Image(bitmap = it.asImageBitmap(), contentDescription = "Scanned Image")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Button zum Starten der Kamera
+        // Button zum Starten der kontinuierlichen Kameraerfassung
         Button(onClick = {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 val CAMERA_PERMISSION_REQUEST_CODE = 1001
                 ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
             } else {
-                cameraLauncher.launch()
+                // Starte die CameraScanActivity
+                val intent = Intent(context, CameraScanActivity::class.java)
+                context.startActivity(intent)
             }
         }) {
-            Text("Bild mit der Kamera aufnehmen")
+            Text("Scannen starten")
         }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Zeige den erkannten Text
-        Text("Erkannter Text: ${viewModel.recognizedText}")
+        Text("Erkannter Text: $recognizedText")
     }
 }
+

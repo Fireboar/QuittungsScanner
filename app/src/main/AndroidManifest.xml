@@ -38,17 +38,14 @@
             android:theme="@style/Theme.QuittungsScanner">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".components.MusicPlayerService" android:foregroundServiceType="mediaPlayback"/>
 
-        <receiver android:name =".components.MyManifestBroadcastReceiver" android:exported="false">
-            <intent-filter>
-                <action android:name="com.example.quittungsscanner.MY_MANIFEST_ACTION" />
-            </intent-filter>
-        </receiver>
+        <activity
+            android:name="com.example.quittungsscanner.data.receipt.CameraScanActivity"
+            android:theme="@style/Theme.AppCompat.Light">
+        </activity>
     </application>
 
 

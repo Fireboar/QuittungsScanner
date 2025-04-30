@@ -17,6 +17,8 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://scanbot-sdk.s3.amazonaws.com/maven-repo/")
+        }
     }
 }
 

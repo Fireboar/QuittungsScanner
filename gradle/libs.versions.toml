@@ -1,9 +1,16 @@
 [versions]
 agp = "8.8.0"
 androidscannerdemo = "2.1.1"
+androidscannerdemoVersion = "1.0.5"
+androidxCameraCamera2 = "1.1.0"
 cameraCamera2 = "1.4.2"
+cameraLifecycle = "1.1.0"
+cameraView = "1.1.0"
+cameraViewVersion = "1.0.0"
 coil = "3.0.4"
 documentScanner = "16.0.0-beta3"
+githubAndroidscannerdemo = "master-SNAPSHOT"
+googleTextRecognition = "17.0.0"
 jetbrainsKotlinxCoroutinesPlayServices = "<version>"
 kotlin = "2.0.0"
 coreKtx = "1.10.1"
@@ -28,6 +35,7 @@ ksp = "2.0.0-1.0.24"
 accompanist = "0.37.0"
 coroutinesTest = "1.10.1"
 mockito = "5.4.0"
+scanbotSdkOcr = "4.0.0"
 tesseractAndroid = "5.0.0"
 tessTwo = "9.1.0"
 textRecognition = "16.0.1"
@@ -35,14 +43,20 @@ textRecognitionVersion = "16.0.0"
 turbine = "1.2.0"
 hilt = "2.51.1"
 hiltNnavigation = "1.2.0"
+visionTextRecognition = "16.0.0"
 
 
 [libraries]
 androidscannerdemo = { module = "com.github.jhansireddy:AndroidScannerDemo", version.ref = "androidscannerdemo" }
+androidscannerdemo-v105 = { module = "com.github.jhansireddy:AndroidScannerDemo", version.ref = "androidscannerdemoVersion" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityCompose" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
+androidx-camera-camera2-v110 = { module = "androidx.camera:camera-camera2", version.ref = "androidxCameraCamera2" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraCamera2" }
+androidx-camera-lifecycle-v110 = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraLifecycle" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraCamera2" }
+androidx-camera-view-v100 = { module = "androidx.camera:camera-view", version.ref = "cameraViewVersion" }
+androidx-camera-view-v110 = { module = "androidx.camera:camera-view", version.ref = "cameraView" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
@@ -77,14 +91,18 @@ androidx-room-ktx = { group= "androidx.room", name = "room-ktx", version.ref = "
 google-accompanist = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist"}
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito" }
+scanbot-sdk-ocr = { module = "io.scanbot.sdk:scanbot-sdk-ocr", version.ref = "scanbotSdkOcr" }
+suddendevelopment-androidscannerdemo = { module = "com.github.SuddenDevelopment:AndroidScannerDemo", version.ref = "githubAndroidscannerdemo" }
 tess-two = { module = "com.rmtheis:tess-two", version.ref = "tessTwo" }
 tesseract-android = { module = "com.googlecode.tesseract.android:tesseract-android", version.ref = "tesseractAndroid" }
 text-recognition = { module = "com.google.mlkit:text-recognition", version.ref = "textRecognition" }
 text-recognition-v1600 = { module = "com.google.mlkit:text-recognition", version.ref = "textRecognitionVersion" }
+text-recognition-v1700 = { module = "com.google.mlkit:text-recognition", version.ref = "googleTextRecognition" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt"}
 dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt"}
 androidx-hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNnavigation"}
+vision-text-recognition = { module = "com.google.mlkit:vision-text-recognition", version.ref = "visionTextRecognition" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
