@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -126,7 +127,7 @@ class CameraScanActivity : ComponentActivity() {
             recognizer.process(inputImage)
                 .addOnSuccessListener { visionText ->
                     val recognized = visionText.text
-                    recognizedText = recognized  // Erkannten Text aktualisieren
+                    recognizedText = recognized
                     Log.d("OCR", "Erkannter Text: $recognized")
                 }
                 .addOnFailureListener { e ->
@@ -192,11 +193,17 @@ class CameraScanActivity : ComponentActivity() {
                         isScanning = false
                         camera?.cameraControl?.enableTorch(false)
 
+                        Toast.makeText(this@CameraScanActivity, "Scan gestoppt", Toast.LENGTH_SHORT).show()
+
+                        // 🟢 Erst erkannte Produkte extrahieren und speichern
+                        val products = extractProducts(recognizedText)
+                        viewModel.setExtractedProducts(products)
+
+                        // 🟢 Dann optional als Result übergeben
                         val resultIntent = Intent()
                         resultIntent.putExtra("recognized_text", recognizedText)
                         setResult(RESULT_OK, resultIntent)
 
-                        Toast.makeText(this@CameraScanActivity, "Scan gestoppt", Toast.LENGTH_SHORT).show()
                         finish()
                     }
                 }) {
@@ -204,6 +211,66 @@ class CameraScanActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+
+    fun extractProducts(text: String): List<Pair<String, String>> {
+        val productNames = extractProductNames(text)
+        val productPairs = mutableListOf<Pair<String, String>>()
+
+        for (productName in productNames) {
+            val name = productName.trim()
+            if (name.isNotEmpty()) {
+                productPairs.add(Pair(name, "0.00")) // Preis erstmal 0 setzen
+            }
+        }
+
+        Log.d("ReceiptScreen2", productPairs.toString())
+
+        return productPairs
+    }
+
+    fun extractProductNames(text: String): List<String> {
+        val lower = text.lowercase()
+
+        // Erlaubt Varianten von "artikelbezeichnung" (z.B. "artikelbezeichnun9")
+        val startRegex = Regex("artikelbezeichn?ung|artikelbezeichnun\\d?", RegexOption.IGNORE_CASE)
+        // Erlaubt Varianten von "total" (z.B. "total", "fotal", etc.)
+        val endRegex = Regex("total", RegexOption.IGNORE_CASE)
+
+        // Finde Start- und End-Indizes mit der Regex
+        val startMatch = startRegex.find(lower)
+        val endMatch = endRegex.find(lower)
+
+        if (startMatch == null || endMatch == null) {
+            Log.d("ReceiptScreen1-Debug", "Start oder Ende nicht gefunden")
+            return emptyList()
+        }
+
+        val startIndex = startMatch.range.last
+        val endIndex = endMatch.range.first
+
+        if (endIndex <= startIndex) {
+            Log.d("ReceiptScreen1-Debug", "Fehler: Endpunkt vor Startpunkt")
+            return emptyList()
+        }
+
+        // Extrahiere den Block zwischen Start und Ende
+        val productBlock = text.substring(startIndex + "artikelbezeichnung".length, endIndex)
+
+        // Zeilenweise analysieren
+        val lines = productBlock.lines()
+        val productNames = mutableListOf<String>()
+
+        for (line in lines) {
+            val cleanLine = line.trim()
+            if (cleanLine.isNotEmpty() && cleanLine.any { it.isLetter() }) {
+                productNames.add(cleanLine)
+            }
+        }
+
+        Log.d("ReceiptScreen1", productNames.toString())
+        return productNames
     }
 
 

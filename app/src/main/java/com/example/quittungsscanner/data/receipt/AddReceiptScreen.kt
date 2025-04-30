@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,11 +26,15 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun AddReceiptScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val recognizedText by viewModel.recognizedText
+    val products by viewModel.products.collectAsState()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -70,8 +75,13 @@ fun AddReceiptScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        //Text(recognizedText)
+        Log.d("ReceiptScreen", "Recognized Text: $recognizedText")
 
-        Text("Erkannter Text: $recognizedText")
+        products.forEach { (name, price) ->
+            Text(text = "$name: $price CHF")
+            Log.d("ReceiptScreen3", "$name: $price CHF" )
+        }
     }
 }
 
