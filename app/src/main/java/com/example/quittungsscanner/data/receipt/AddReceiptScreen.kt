@@ -1,4 +1,4 @@
-package com.example.quittungsscanner.ui.Screens
+package com.example.quittungsscanner.data.receipt
 
 import android.Manifest
 import android.app.Activity
@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.quittungsscanner.data.receipt.ReceiptViewModel
 
 @Composable
 fun AddReceiptScreen(viewModel: ReceiptViewModel = hiltViewModel()){
