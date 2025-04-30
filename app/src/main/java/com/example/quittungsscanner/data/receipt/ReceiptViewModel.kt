@@ -6,15 +6,16 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import androidx.compose.runtime.State
 
 
 @HiltViewModel
 class ReceiptViewModel @Inject constructor() : ViewModel() {
 
-    var recognizedText by mutableStateOf("")
+    private val _recognizedText = mutableStateOf("")
+    val recognizedText: State<String> = _recognizedText
 
-    // Methode umbenennen, um den Konflikt zu vermeiden
-    fun updateRecognizedText(text: String) {
-        recognizedText = text
+    fun setRecognizedText(text: String) {
+        _recognizedText.value = text
     }
 }

@@ -23,32 +23,25 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizer
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
 @Composable
 fun AddReceiptScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
     val context = LocalContext.current
-    var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var recognizedText by remember { mutableStateOf("") }
+    val recognizedText by viewModel.recognizedText
 
-    // Funktion zur kontinuierlichen Texterkennung
-    fun processDocumentScan(bitmap: Bitmap) {
-        val options = TextRecognizerOptions.Builder().build()
-        val recognizer: TextRecognizer = TextRecognition.getClient(options)
-        val inputImage = InputImage.fromBitmap(bitmap, 0)
-
-        recognizer.process(inputImage)
-            .addOnSuccessListener { visionText ->
-                val newText = visionText.text
-                recognizedText = newText // Update des erkannten Textes
-            }
-            .addOnFailureListener { e ->
-                // Fehlerbehandlung, falls OCR fehlschlägt
-            }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val text = result.data?.getStringExtra("recognized_text") ?: ""
+            viewModel.setRecognizedText(text)
+        }
     }
+
+    var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
 
     Column {
         // Zeige das Bild an, wenn es verfügbar ist
@@ -58,15 +51,17 @@ fun AddReceiptScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Button zum Starten der kontinuierlichen Kameraerfassung
         Button(onClick = {
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                val CAMERA_PERMISSION_REQUEST_CODE = 1001
-                ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    context as Activity,
+                    arrayOf(Manifest.permission.CAMERA),
+                    1001
+                )
             } else {
-                // Starte die CameraScanActivity
                 val intent = Intent(context, CameraScanActivity::class.java)
-                context.startActivity(intent)
+                launcher.launch(intent)
             }
         }) {
             Text("Scannen starten")
