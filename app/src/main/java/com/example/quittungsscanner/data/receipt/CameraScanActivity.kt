@@ -216,12 +216,16 @@ class CameraScanActivity : ComponentActivity() {
 
     fun extractProducts(text: String): List<Pair<String, String>> {
         val productNames = extractProductNames(text)
+        val prices = extractPrices(text)
+        val limitedPrices = prices.take(productNames.size)
+
         val productPairs = mutableListOf<Pair<String, String>>()
 
-        for (productName in productNames) {
-            val name = productName.trim()
+        for (i in productNames.indices) {
+            val name = productNames[i].trim()
+            val price = if (i < limitedPrices.size) limitedPrices[i] else "0.00"
             if (name.isNotEmpty()) {
-                productPairs.add(Pair(name, "0.00")) // Preis erstmal 0 setzen
+                productPairs.add(Pair(name, price))
             }
         }
 
@@ -236,7 +240,7 @@ class CameraScanActivity : ComponentActivity() {
         // Erlaubt Varianten von "artikelbezeichnung" (z.B. "artikelbezeichnun9")
         val startRegex = Regex("artikelbezeichn?ung|artikelbezeichnun\\d?", RegexOption.IGNORE_CASE)
         // Erlaubt Varianten von "total" (z.B. "total", "fotal", etc.)
-        val endRegex = Regex("total", RegexOption.IGNORE_CASE)
+        val endRegex = Regex("total chf", RegexOption.IGNORE_CASE)
 
         // Finde Start- und End-Indizes mit der Regex
         val startMatch = startRegex.find(lower)
@@ -265,12 +269,55 @@ class CameraScanActivity : ComponentActivity() {
         for (line in lines) {
             val cleanLine = line.trim()
             if (cleanLine.isNotEmpty() && cleanLine.any { it.isLetter() }) {
-                productNames.add(cleanLine)
+                val lineWithoutNumbers = cleanLine.replace(Regex("\\d+"), "")
+                productNames.add(lineWithoutNumbers.trim())
             }
         }
 
-        Log.d("ReceiptScreen1", productNames.toString())
         return productNames
+    }
+
+    fun extractPrices(text: String): List<String> {
+        val lower = text.lowercase()
+        // Startpunkt ist entweder "preis" oder "gespart"
+        val startRegex = Regex("preis|gespart", RegexOption.IGNORE_CASE)
+        val endRegex = Regex("artikelbezeichn?ung", RegexOption.IGNORE_CASE)
+
+        val startMatch = startRegex.find(lower)
+        val endMatch = endRegex.find(lower)
+
+        if (startMatch == null || endMatch == null) {
+            Log.d("ReceiptScreen3-Debug", "Start oder Ende nicht gefunden")
+            return emptyList()
+        }
+
+        val startIndex = startMatch.range.last
+        val endIndex = endMatch.range.first
+
+        if (endIndex <= startIndex) {
+            Log.d("ReceiptScreen3-Debug", "Fehler: Endpunkt vor Startpunkt")
+            return emptyList()
+        }
+
+        val priceBlock = text.substring(startIndex, endIndex)
+
+        // Zeilenweise analysieren und nur Preise extrahieren
+        val lines = text.lines()
+        val prices = mutableListOf<String>()
+
+        val priceRegex = Regex("""\b\d{1,3}([.:,])\d{1,2}\b""")  // Erlaubt z.B. 3:70, 2.85, 9.15 etc.
+
+        for (line in lines) {
+            val matches = priceRegex.findAll(line)
+            for (match in matches) {
+                // ":" durch "." ersetzen für Einheitlichkeit
+                prices.add(match.value.replace(":", "."))
+            }
+        }
+
+        Log.d("ReceiptScreen3", prices.toString())
+        return prices
+
     }
 
 
