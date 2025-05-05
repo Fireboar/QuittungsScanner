@@ -2,8 +2,8 @@ package com.example.quittungsscanner.data.user
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.quittungsscanner.data.database.UserDao
-import com.example.quittungsscanner.data.database.UserEntity
+// import com.example.quittungsscanner.data.database.UserDao
+// com.example.quittungsscanner.data.database.UserEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val userDataStore: UserDataStore,
-    private val userDao: UserDao
+   // private val userDao: UserDao
 ) : ViewModel() {
     val userFlow: StateFlow<User> = userDataStore
         .user
@@ -35,14 +35,14 @@ class UserViewModel @Inject constructor(
 
     fun addUser(user: User) {
         viewModelScope.launch {
-            val userEntity = UserEntity(name = user.name, age = user.age, authorized = user.authorized)
-            userDao.insertUser(userEntity)
+            //val userEntity = UserEntity(name = user.name, age = user.age, authorized = user.authorized)
+            //userDao.insertUser(userEntity)
         }
     }
 
-    fun getUsers(): Flow<List<UserEntity>> {
-        return userDao.flowLoadAllUsers()
-    }
+    //fun getUsers(): Flow<List<UserEntity>> {
+    //    return userDao.flowLoadAllUsers()
+    //}
 
 
 }
