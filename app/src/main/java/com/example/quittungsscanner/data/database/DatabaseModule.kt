@@ -17,12 +17,12 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): MyDatabase {
+    fun provideDatabase(@ApplicationContext context: Context): BudgetTrackerDatabase {
         val ioDispatcherExecutor = Dispatchers.IO.asExecutor()
         return Room.databaseBuilder(
             context,
-            MyDatabase::class.java,
-            "my-database"
+            BudgetTrackerDatabase::class.java,
+            "budget_tracker_database"
         )
             .setQueryExecutor(ioDispatcherExecutor)
             .setTransactionExecutor(ioDispatcherExecutor)
@@ -30,7 +30,12 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideUserDao(database: MyDatabase): UserDao {
-        return database.userDao()
+    fun provideProductDao(database: BudgetTrackerDatabase): ProductDao {
+        return database.productDao()
+    }
+
+    @Provides
+    fun provideReceiptDao(database: BudgetTrackerDatabase): ReceiptDao {
+        return database.receiptDao()
     }
 }
