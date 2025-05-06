@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -159,16 +158,6 @@ class CameraScanActivity : ComponentActivity() {
                     .align(Alignment.TopCenter)
             )
 
-            // 🔴 Horizontale Hilfslinie in der Mitte des Kamera-Previews
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .align(Alignment.TopCenter)  // An den Kamera-Bereich anpassen
-                    .padding(top = 200.dp)       // -> halbe Höhe des Kamera-Bereichs (400dp)
-                    .background(androidx.compose.ui.graphics.Color.Red)
-            )
-
             // UI-Buttons unten anzeigen
             Column(
                 modifier = Modifier
@@ -195,13 +184,9 @@ class CameraScanActivity : ComponentActivity() {
 
                         Toast.makeText(this@CameraScanActivity, "Scan gestoppt", Toast.LENGTH_SHORT).show()
 
-                        // 🟢 Erst erkannte Produkte extrahieren und speichern
-                        val products = extractProducts(recognizedText)
-                        viewModel.setExtractedProducts(products)
-
-                        // 🟢 Dann optional als Result übergeben
-                        val resultIntent = Intent()
-                        resultIntent.putExtra("recognized_text", recognizedText)
+                        val resultIntent = Intent().apply {
+                            putExtra("recognized_text", recognizedText)  // ✅ Text zurückgeben!
+                        }
                         setResult(RESULT_OK, resultIntent)
 
                         finish()
@@ -209,116 +194,80 @@ class CameraScanActivity : ComponentActivity() {
                 }) {
                     Text("Stop Scan")
                 }
+                TestReceiptButton()
+
             }
         }
     }
 
+    @Composable
+    fun TestReceiptButton() {
+        val dummyText = getDummyReceiptText()
 
-    fun extractProducts(text: String): List<Pair<String, String>> {
-        val productNames = extractProductNames(text)
-        val prices = extractPrices(text)
-        val limitedPrices = prices.take(productNames.size)
-
-        val productPairs = mutableListOf<Pair<String, String>>()
-
-        for (i in productNames.indices) {
-            val name = productNames[i].trim()
-            val price = if (i < limitedPrices.size) limitedPrices[i] else "0.00"
-            if (name.isNotEmpty()) {
-                productPairs.add(Pair(name, price))
-            }
+        Button(
+            onClick = {
+                val resultIntent = Intent().apply {
+                    putExtra("recognized_text", dummyText)  // ✅ Testtext zurückgeben
+                }
+                setResult(RESULT_OK, resultIntent)
+                finish()
+            },
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
+            Text("Test-Beleg analysieren")
         }
-
-        Log.d("ReceiptScreen2", productPairs.toString())
-
-        return productPairs
     }
 
-    fun extractProductNames(text: String): List<String> {
-        val lower = text.lowercase()
-
-        // Erlaubt Varianten von "artikelbezeichnung" (z.B. "artikelbezeichnun9")
-        val startRegex = Regex("artikelbezeichn?ung|artikelbezeichnun\\d?", RegexOption.IGNORE_CASE)
-        // Erlaubt Varianten von "total" (z.B. "total", "fotal", etc.)
-        val endRegex = Regex("total chf", RegexOption.IGNORE_CASE)
-
-        // Finde Start- und End-Indizes mit der Regex
-        val startMatch = startRegex.find(lower)
-        val endMatch = endRegex.find(lower)
-
-        if (startMatch == null || endMatch == null) {
-            Log.d("ReceiptScreen1-Debug", "Start oder Ende nicht gefunden")
-            return emptyList()
-        }
-
-        val startIndex = startMatch.range.last
-        val endIndex = endMatch.range.first
-
-        if (endIndex <= startIndex) {
-            Log.d("ReceiptScreen1-Debug", "Fehler: Endpunkt vor Startpunkt")
-            return emptyList()
-        }
-
-        // Extrahiere den Block zwischen Start und Ende
-        val productBlock = text.substring(startIndex + "artikelbezeichnung".length, endIndex)
-
-        // Zeilenweise analysieren
-        val lines = productBlock.lines()
-        val productNames = mutableListOf<String>()
-
-        for (line in lines) {
-            val cleanLine = line.trim()
-            if (cleanLine.isNotEmpty() && cleanLine.any { it.isLetter() }) {
-                val lineWithoutNumbers = cleanLine.replace(Regex("\\d+"), "")
-                productNames.add(lineWithoutNumbers.trim())
-            }
-        }
-
-        return productNames
+    fun getDummyReceiptText(): String {
+        return """
+        MIGROs
+        Genassenschaft Higros 0stsouueiz
+        M.tee Scherzingen
+        Tel, 058 712 52 00
+        Bespart Totel
+        Preis
+        Meige
+        3.50 1
+        10.35T
+        35.00 2.59
+        2 1.75
+        Artikelbeze ichiuns
+        Poulet Schnitze
+        Poulet-Cervelas
+        2.59
+        Sie sparen total
+        13.85
+        13.85
+        15.39
+        Total CHF
+        TUINT QR
+        Total in EUR
+        TWINT
+        21:43
+        #31574182×00069505/f51083/0000
+        XXXXXXXXXXXXXXX6069
+        Buchung
+        05.05.2025
+        13.85
+        0000002#
+        Total -EFT CHF:
+        CHE-105.784.711 MUST
+        MUST
+        0.35
+        Total
+        13.85
+        Satz
+        2.60
+        #
+        HUST.-lunner
+        Gr
+        1
+        Besten Dank für Ihren Einkauf!
+    """.trimIndent()
     }
 
-    fun extractPrices(text: String): List<String> {
-        val lower = text.lowercase()
-        // Startpunkt ist entweder "preis" oder "gespart"
-        val startRegex = Regex("preis|gespart", RegexOption.IGNORE_CASE)
-        val endRegex = Regex("artikelbezeichn?ung", RegexOption.IGNORE_CASE)
 
-        val startMatch = startRegex.find(lower)
-        val endMatch = endRegex.find(lower)
-
-        if (startMatch == null || endMatch == null) {
-            Log.d("ReceiptScreen3-Debug", "Start oder Ende nicht gefunden")
-            return emptyList()
-        }
-
-        val startIndex = startMatch.range.last
-        val endIndex = endMatch.range.first
-
-        if (endIndex <= startIndex) {
-            Log.d("ReceiptScreen3-Debug", "Fehler: Endpunkt vor Startpunkt")
-            return emptyList()
-        }
-
-        val priceBlock = text.substring(startIndex, endIndex)
-
-        // Zeilenweise analysieren und nur Preise extrahieren
-        val lines = text.lines()
-        val prices = mutableListOf<String>()
-
-        val priceRegex = Regex("""\b\d{1,3}([.:,])\d{1,2}\b""")  // Erlaubt z.B. 3:70, 2.85, 9.15 etc.
-
-        for (line in lines) {
-            val matches = priceRegex.findAll(line)
-            for (match in matches) {
-                // ":" durch "." ersetzen für Einheitlichkeit
-                prices.add(match.value.replace(":", "."))
-            }
-        }
-
-        Log.d("ReceiptScreen3", prices.toString())
-        return prices
-
-    }
 
 
     override fun onDestroy() {
