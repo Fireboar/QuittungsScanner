@@ -28,7 +28,7 @@ abstract class BudgetTrackerDatabase: RoomDatabase() {
 @Dao
 interface ReceiptDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertReceipt(vararg receipt: Receipt)
+    suspend fun insertReceipt(receipt: Receipt): Long
 
     @Transaction
     @Query("SELECT * FROM receipts")
@@ -41,7 +41,10 @@ interface ReceiptDao {
 @Dao
 interface ProductDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProduct(vararg product: Product)
+    suspend fun insertProduct(product: Product):Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProducts(vararg products: Product): List<Long>
 
     @Query("SELECT * FROM products WHERE receiptId = :receiptId")
     suspend fun getProductsByReceipt(receiptId: Long): List<Product>

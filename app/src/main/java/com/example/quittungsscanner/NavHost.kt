@@ -1,5 +1,6 @@
 package com.example.quittungsscanner
 
+import android.widget.ScrollView
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -10,6 +11,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.quittungsscanner.data.receipt.AddReceiptScreen
+import com.example.quittungsscanner.data.receipt.ReceiptSavedScreen
 import com.example.quittungsscanner.ui.Screens.AuswertungenScreen
 import com.example.quittungsscanner.ui.Screens.HomeScreen
 import com.example.quittungsscanner.ui.Screens.ProfileScreen
@@ -31,7 +33,7 @@ fun MyNavHost(
 
     ) {
         composable(route = Screens.Home.name) {
-            HomeScreen(navHostController)
+            HomeScreen()
         }
         composable(
             route = Screens.Auswertungen.name,
@@ -41,7 +43,7 @@ fun MyNavHost(
         composable(
             route = Screens.AddQuittung.name,
         ) {
-            AddReceiptScreen()
+            AddReceiptScreen(navHostController)
         }
         composable(
             route = Screens.Receipt.name,
@@ -53,6 +55,13 @@ fun MyNavHost(
         ) {
             ProfileScreen()
         }
+        composable(
+            Screens.savedReceipt.name
+        ) {
+            ReceiptSavedScreen(navHostController)
+        }
     }
 }
+
+
 
