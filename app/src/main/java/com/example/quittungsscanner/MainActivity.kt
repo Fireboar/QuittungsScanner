@@ -75,8 +75,8 @@ class MainActivity : ComponentActivity() {
                         hasNews = false,
                     ),
                     BottomNavigationItem(
-                        route = Screens.Receipt.name,
-                        title = Screens.Receipt.name,
+                        route = Screens.Quittungen.name,
+                        title = Screens.Quittungen.name,
                         selectedIcon = Icons.Filled.Receipt,
                         unselectedIcon = Icons.Outlined.Receipt,
                         hasNews = false,

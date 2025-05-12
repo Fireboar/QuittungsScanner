@@ -39,9 +39,12 @@ class ReceiptViewModel @Inject constructor(
         }
     }
 
-    fun saveReceiptToDatabase(onSaved: () -> Unit) {
+    fun saveReceiptToDatabase( storeName:String,onSaved: () -> Unit) {
         viewModelScope.launch {
-            val receipt = Receipt(dateCreated = Date())
+            val receipt = Receipt(
+                dateCreated = Date(),
+                storeName = storeName
+            )
             val receiptId = receiptDao.insertReceipt(receipt)
 
             val productEntities = _products.value.mapNotNull { (name, priceStr) ->
@@ -65,6 +68,27 @@ class ReceiptViewModel @Inject constructor(
     fun loadReceipts() {
         viewModelScope.launch {
             _receipts.value = receiptDao.getReceiptsWithProducts()
+        }
+    }
+
+    fun updateProduct(updatedProduct: Product) {
+        viewModelScope.launch {
+            productDao.updateProduct(updatedProduct)
+            loadReceipts()
+        }
+    }
+
+    suspend fun getProductById(productId: Long): Product? {
+        return productDao.getProductById(productId)
+    }
+
+    private val _receiptWithProducts = MutableStateFlow<ReceiptWithProducts?>(null)
+    val receiptWithProducts: StateFlow<ReceiptWithProducts?> get() = _receiptWithProducts
+
+    fun getReceiptWithProducts(receiptId: Long) {
+        viewModelScope.launch {
+            val result = receiptDao.getReceiptsWithProducts().find { it.receipt.id == receiptId }
+            _receiptWithProducts.value = result
         }
     }
 }

@@ -27,7 +27,7 @@ fun CustomTopBar(navController: NavController) {
     TopAppBar(
         title = {
             Text(
-                text = screenName,
+                text = if (screenName == "AddQuittung") "Quittung Hinzufügen" else screenName,
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White
             )
