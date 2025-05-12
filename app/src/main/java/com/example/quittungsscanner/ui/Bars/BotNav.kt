@@ -49,7 +49,7 @@ fun BottomNavigation(
                 },
                 label = {
                     Text(
-                        item.title,
+                        text = if (item.title == "AddQuittung") "Quittung Hinzufügen" else item.title,
                         maxLines = 1,
                         softWrap = false
                     )

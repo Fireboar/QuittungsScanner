@@ -4,7 +4,7 @@ enum class Screens {
     Home,
     Auswertungen,
     AddQuittung,
-    Receipt,
+    Quittungen,
     savedReceipt,
     Profil
 }

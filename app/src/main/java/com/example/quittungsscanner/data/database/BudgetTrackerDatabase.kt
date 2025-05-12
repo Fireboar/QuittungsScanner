@@ -15,6 +15,7 @@ import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import androidx.room.Update
 import java.util.Date
 
 
@@ -49,8 +50,14 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE receiptId = :receiptId")
     suspend fun getProductsByReceipt(receiptId: Long): List<Product>
 
+    @Query("SELECT * FROM products WHERE id = :id")
+    suspend fun getProductById(id: Long): Product?
+
     @Query("DELETE FROM products WHERE id = :id")
     suspend fun deleteProductById(id: Long)
+
+    @Update
+    suspend fun updateProduct(product: Product)
 }
 
 @Entity(
@@ -59,7 +66,8 @@ interface ProductDao {
 data class Receipt(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val dateCreated: Date
+    val dateCreated: Date,
+    val storeName: String
 )
 
 @Entity(
