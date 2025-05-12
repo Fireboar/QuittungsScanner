@@ -5,5 +5,6 @@ enum class Screens {
     Auswertungen,
     AddQuittung,
     Receipt,
+    savedReceipt,
     Profil
 }

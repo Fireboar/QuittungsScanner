@@ -33,9 +33,15 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.navigation.NavController
+import com.example.quittungsscanner.ui.Screens.Screens
 
 @Composable
-fun AddReceiptScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
+fun AddReceiptScreen(
+    navController: NavController,
+    viewModel: ReceiptViewModel = hiltViewModel()) {
     val context = LocalContext.current
 
     val launcher = rememberLauncherForActivityResult(
@@ -67,12 +73,14 @@ fun AddReceiptScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        ProductList()
+        ProductList(navController = navController)
     }
 }
 
 @Composable
-fun ProductList(viewModel: ReceiptViewModel = hiltViewModel()) {
+fun ProductList(
+    viewModel: ReceiptViewModel = hiltViewModel(),
+    navController: NavController) {
     val products by viewModel.products.collectAsState()
 
     // Gesamtsumme berechnen
@@ -124,9 +132,49 @@ fun ProductList(viewModel: ReceiptViewModel = hiltViewModel()) {
         ) {
             Text(text = "Summe: %.2f CHF".format(total))
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                viewModel.saveReceiptToDatabase {
+                    navController.navigate(Screens.savedReceipt.name)
+                }
+            },
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            Text("Beleg speichern")
+        }
     }
 }
 
+@Composable
+fun ReceiptSavedScreen(navController: NavController) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Beleg wurde erfolgreich gespeichert!",
+            style = MaterialTheme.typography.headlineSmall
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(onClick = {
+            navController.navigate(Screens.AddQuittung.name) {
+                popUpTo("add_receipt") { inclusive = true } // verhindert Zurück zu diesem Screen
+            }
+        }) {
+            Text("Mehr Quittungen Scannen")
+        }
+    }
+}
 
 
 
