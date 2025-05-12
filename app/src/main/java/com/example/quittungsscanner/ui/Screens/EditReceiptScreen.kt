@@ -55,7 +55,7 @@ fun EditReceiptScreen(
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(receiptWithProducts?.receipt?.storeName ?: "Unbekannt")
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy, HH:mm", Locale.getDefault())
         val formattedDate = dateFormat.format(receiptWithProducts!!.receipt.dateCreated)
 
         Text("Datum: $formattedDate", style = MaterialTheme.typography.bodyMedium)
