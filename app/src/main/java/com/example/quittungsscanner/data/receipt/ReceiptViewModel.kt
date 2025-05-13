@@ -22,6 +22,12 @@ class ReceiptViewModel @Inject constructor(
     private val receiptDao: ReceiptDao,
     private val productDao: ProductDao
 ) : ViewModel() {
+
+    fun getStoreName(text: String): String {
+        val storeName = TextProcessor.getStoreName(text)
+        return storeName
+    }
+
     private val _products = MutableStateFlow<List<Pair<String, String>>>(emptyList())
     val products: StateFlow<List<Pair<String, String>>> get() = _products
 
