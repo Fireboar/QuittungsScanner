@@ -1,6 +1,7 @@
 package com.example.quittungsscanner.data.receipt
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quittungsscanner.data.database.Product
@@ -38,7 +39,18 @@ class ReceiptViewModel @Inject constructor(
         _products.value = productPairs
     }
 
+    fun addProduct(name: String, price: String) {
+        val newProduct = name to price
+        _products.update { current ->
+            current.toMutableList().apply {
+                add(newProduct)
+            }
+        }
+    }
 
+    fun deleteProduct(product: Pair<String, String>) {
+        _products.update { it.toMutableList().apply { remove(product) } }
+    }
 
     fun updateProduct(index: Int, name: String, price: String) {
         _products.update { current ->
