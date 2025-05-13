@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.example.quittungsscanner.data.receipt.TextProcessor.levenshtein
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
@@ -45,12 +46,12 @@ import java.util.concurrent.Executors
 
 class CameraScanActivity : ComponentActivity() {
 
-    private val viewModel: ReceiptViewModel by viewModels()
     private lateinit var cameraExecutor: ExecutorService
     private var camera: Camera? = null
     private lateinit var previewView: PreviewView  // PreviewView für die Kameraansicht
     private var isScanning = false  // Flag, um den Scan-Prozess zu verfolgen
     private var recognizedText by mutableStateOf("")
+    private val recognizedTexts = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,6 +128,7 @@ class CameraScanActivity : ComponentActivity() {
                 .addOnSuccessListener { visionText ->
                     val recognized = visionText.text
                     recognizedText = recognized
+                    recognizedTexts.add(recognized)
                     Log.d("OCR", "Erkannter Text: $recognized")
                 }
                 .addOnFailureListener { e ->
@@ -184,8 +186,19 @@ class CameraScanActivity : ComponentActivity() {
 
                         Toast.makeText(this@CameraScanActivity, "Scan gestoppt", Toast.LENGTH_SHORT).show()
 
+                        val targetStart = "artikelbezeichnung"
+                        val possibleEndWords = listOf("total chf", "sie sparen total", "total", "total in eur")
+
+                        val result = getTextWithStartEndString(
+                            recognizedTexts,
+                            targetStart,
+                            possibleEndWords,
+                            maxStartDistance = 4,
+                            maxEndDistance = 6
+                        ) ?: recognizedText
+
                         val resultIntent = Intent().apply {
-                            putExtra("recognized_text", recognizedText)  // ✅ Text zurückgeben!
+                            putExtra("recognized_text", result)  // ✅ Text zurückgeben!
                         }
                         setResult(RESULT_OK, resultIntent)
 
@@ -219,50 +232,100 @@ class CameraScanActivity : ComponentActivity() {
         }
     }
 
+    fun getTextWithStartEndString(
+        recognizedTexts: List<String>,
+        startString: String,
+        possibleEndWords: List<String>,
+        maxStartDistance: Int = 4,
+        maxEndDistance: Int = 6
+    ): String? {
+
+        for (text in recognizedTexts) {
+            // Lowercase the text to make the matching case insensitive
+            val cleanedText = text.lowercase()
+
+            // Perform fuzzy start matching using Levenshtein distance
+            val fuzzyStartMatch = levenshtein(cleanedText, startString.lowercase()) <= maxStartDistance
+            val startMatch = Regex("artikel[bsz]e?zeich(n|n?u|nu?g|ung)?", RegexOption.IGNORE_CASE).containsMatchIn(text)
+
+            // Check if the start string has a fuzzy match
+            if (fuzzyStartMatch || startMatch) {
+                // Now look for a match with any of the possible end words
+                for (endString in possibleEndWords) {
+                    val endIndex = text.indexOf(endString)
+                    if (endIndex != -1) {
+                        // Perform fuzzy matching for the end string
+                        val endSubString = text.substring(endIndex, endIndex + endString.length)
+                        val endDistance = levenshtein(endString.lowercase(), endSubString.lowercase())
+
+                        if (endDistance <= maxEndDistance) {
+                            Log.d("OCR", "PASSENDER TEXT")
+                            return text // Return the matching text if both start and end criteria are satisfied
+                        }
+                    }
+                }
+            }
+        }
+        return null // Return null if no matching text is found
+    }
+
     fun getDummyReceiptText(): String {
         return """
-        MIGROs
-        Genassenschaft Higros 0stsouueiz
-        M.tee Scherzingen
-        Tel, 058 712 52 00
-        Bespart Totel
-        Preis
-        Meige
-        3.50 1
-        10.35T
-        35.00 2.59
-        2 1.75
-        Artikelbeze ichiuns
-        Poulet Schnitze
-        Poulet-Cervelas
-        2.59
+        MH Seepark
+        Tel. 058 712 75 00
+        Totel#
+        Preis Gespart
+        Menge
+        Artikelbezeichnung
+        4.20 1
+        6.25 1
+        7.65 1
+        5.26 1
+        6.25
+        4.20
+        0.94
+        1
+        36.00
+        3.19
+        Bio Erdbeeren
+        Bio Heide lbeeren
+        Pouletbrust Medaillon 1
+        Joghurt Nature
+        2
+        0.01-
+        0.95
+        Rundungsorteil
         Sie sparen total
-        13.85
-        13.85
-        15.39
+        23.35
+        23.35
+        25.94
         Total CHF
-        TUINT QR
+        TUINT OR
         Total in EUR
-        TWINT
-        21:43
-        #31574182×00069505/f51083/0000
+        TUINT
+        16:50
+        831526678•00271166/5c4cc4/0000
         XXXXXXXXXXXXXXX6069
         Buchung
-        05.05.2025
-        13.85
-        0000002#
-        Total -EFT CHF:
+        12.05.2025
+        23.35
+        00000028
+        Total-EFT CHF:
+        23.36
+        542.65
+        2099.60).308.781
+        Punktestand per 11.05.205
+        Cunulus-Nunner
+        Erhaltene Punkte
+        NUS
         CHE-105.784.711 MUST
-        MUST
-        0.35
+        0.59
         Total
-        13.85
+        23.36
         Satz
         2.60
-        #
-        HUST.-lunner
+        # NUST. -Nunner
         Gr
-        1
         Besten Dank für Ihren Einkauf!
     """.trimIndent()
     }

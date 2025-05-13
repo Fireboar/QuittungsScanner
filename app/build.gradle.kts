@@ -81,13 +81,11 @@ dependencies {
     implementation (libs.text.recognition)
     implementation (libs.androidx.activity.ktx)
     implementation (libs.kotlinx.coroutines.play.services)
+
     //Scanning
     implementation (libs.text.recognition)
-
     implementation (libs.androidx.camera.camera2.v110)
     implementation (libs.androidx.camera.lifecycle.v110)
     implementation (libs.androidx.camera.view.v110)
-
     implementation (libs.androidx.camera.view.v100)
-
 }

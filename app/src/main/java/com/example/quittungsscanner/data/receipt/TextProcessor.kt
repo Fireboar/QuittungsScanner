@@ -1,140 +1,109 @@
 package com.example.quittungsscanner.data.receipt
 
+import android.annotation.SuppressLint
 import android.util.Log
+import java.util.Locale
+import kotlin.math.absoluteValue
+import kotlin.math.log
+import kotlin.math.roundToInt
 
 object TextProcessor {
 
+    @SuppressLint("DefaultLocale")
     fun extractProducts(text: String): List<Pair<String, String>> {
-        Log.d("ReceiptScreen", text)
-        val productNames = extractProductNames(text)
-        val prices = extractPrices(text)
-        val limitedPrices = prices.take(productNames.size)
-
-        val productPairs = mutableListOf<Pair<String, String>>()
-
-        for (i in productNames.indices) {
-            val name = productNames[i].trim()
-            val price = if (i < limitedPrices.size) limitedPrices[i] else "0.00"
-            if (name.isNotEmpty()) {
-                productPairs.add(Pair(name, price))
-            }
-        }
-
-        Log.d("ReceiptScreen Products", productPairs.toString())
-
-        return productPairs
-    }
-
-    fun extractProductNames(text: String): List<String> {
+        Log.d("TextProcessor Text", text)
         val lines = text.lines()
-        val productLines = mutableListOf<String>()
-
-        var startIndex = -1
-        var endIndex = -1
+        val productList = mutableListOf<Pair<String, String>>()
+        val prices = mutableListOf<String>()
 
         // Suchbegriffe
         val targetStart = "artikelbezeichnung"
-        val targetEnd = "total chf"
-        val possibleEndWords = listOf("total chf", "sie sparen total", "total", "total in eur")
+        val possibleEndWords = listOf("total chf", "sie sparen total", "total", "total in eur", "rundungsvorteil")
 
         // Levenshtein-Toleranzen
         val maxStartDistance = 4
-        val maxEndDistance = 6
-
-        // Zeile für Zeile analysieren
-        for ((i, line) in lines.withIndex()) {
-            val cleanedLine = line.lowercase().replace("[^a-z]".toRegex(), "")
-
-            val startMatch = Regex("artikel[bsz]e?zeich(n|n?u|nu?g|ung)?", RegexOption.IGNORE_CASE).containsMatchIn(line)
-            val fuzzyStartMatch = levenshtein(cleanedLine, targetStart) <= maxStartDistance
-
-            if (startIndex == -1 && (startMatch || fuzzyStartMatch)) {
-                startIndex = i + 1
-                continue
-            }
-
-            if (startIndex != -1) {
-                val isFuzzyEndMatch = possibleEndWords.any {
-                    levenshtein(cleanedLine, it.replace(" ", "")) <= maxEndDistance
-                }
-                if (isFuzzyEndMatch) {
-                    endIndex = i
-                    break
-                }
-            }
-        }
-
-        if (startIndex == -1 || endIndex == -1 || endIndex <= startIndex) {
-            Log.d("ReceiptScreen Names", "Start oder Ende nicht erkannt oder ungültig")
-            return emptyList()
-        }
-
-        // Zwischen Start- und Endzeile extrahieren
-        for (i in startIndex until endIndex) {
-            val cleanLine = lines[i].trim()
-            if (cleanLine.isNotEmpty() && cleanLine.any { it.isLetter() }) {
-                val lineWithoutNumbers = cleanLine.replace(Regex("\\d+"), "")
-                productLines.add(lineWithoutNumbers.trim())
-            }
-        }
-
-        Log.d("ReceiptScreen Names", productLines.toString())
-        return productLines
-    }
-
-    fun extractPrices(text: String): List<String> {
-        val lines = text.lines()
-        val prices = mutableListOf<String>()
-
-        val startTargets = listOf("preis", "gespart")
-        val endTarget = "artikelbezeichnung"
-
-        val maxStartDistance = 4
-        val maxEndDistance = 6
+        val maxEndDistance = 3
 
         var startIndex = -1
-        var endIndex = -1
+        var endIndex = lines.size  // Standardmäßig bis zum Ende
 
-        // Starte mit Zeilenanalyse
+        // 1. STARTWORT finden
         for ((i, line) in lines.withIndex()) {
             val cleanedLine = line.lowercase().replace("[^a-z]".toRegex(), "")
+            val startMatch = Regex("artikel[bsz]e?zeich(n|n?u|nu?g|ung)?", RegexOption.IGNORE_CASE).containsMatchIn(line)
+            val fuzzyStartMatch = levenshtein(cleanedLine, targetStart.replace(" ", "")) <= maxStartDistance
 
-            // Prüfe alle möglichen Startbegriffe
-            if (startIndex == -1 && startTargets.any { levenshtein(cleanedLine, it) <= maxStartDistance }) {
-                startIndex = i + 1
-                continue
-            }
-
-            // Prüfe das Ende (Artikelbezeichnung)
-            if (startIndex != -1 && levenshtein(cleanedLine, endTarget) <= maxEndDistance) {
-                endIndex = i
+            if (startMatch || fuzzyStartMatch) {
+                startIndex = i + 1  // Produkte beginnen nach der Startzeile
                 break
             }
         }
 
-        if (startIndex == -1 || endIndex == -1 || endIndex <= startIndex) {
-            Log.d("ReceiptScreen Prices", "Start oder Ende nicht gefunden oder ungültig")
+        // Wenn kein Startwort → leer zurückgeben
+        if (startIndex == -1) {
+            Log.d("TextProcessor", "❌ Kein Startwort gefunden")
             return emptyList()
         }
 
-        val priceBlock = lines.subList(startIndex, endIndex)
+        // 2. ENDWORT suchen **nach** dem Startwort
+        for (i in startIndex until lines.size) {
+            val originalLine = lines[i]
+            val cleanedLine = originalLine.lowercase().replace("[^a-z]".toRegex(), "")
 
-        val priceRegex = Regex("""\d{1,3}([.:,])\d{1,2}[a-zA-Z]*""")  // erlaubt z. B. "10.35T", "2.50CHF"
+            val matchedEndWord = possibleEndWords.firstOrNull {
+                val distance = levenshtein(cleanedLine, it.replace(" ", ""))
+                distance <= maxEndDistance
+            }
 
-
-        for (line in priceBlock) {
-            val matches = priceRegex.findAll(line)
-            for (match in matches) {
-                val rawPrice = match.value
-                val cleanedPrice = rawPrice
-                    .replace(":", ".")              // Einheitlich auf Dezimalpunkt
-                    .replace("[^\\d.]".toRegex(), "") // Entfernt Buchstaben etc., behält Ziffern und Punkt
-                prices.add(cleanedPrice)
+            if (matchedEndWord != null) {
+                endIndex = i
+                Log.d("TextProcessor", "✅ Endwort erkannt: '$matchedEndWord' in Zeile $i: '$originalLine'")
+                break
             }
         }
 
-        Log.d("ReceiptScreen Prices", prices.toString())
-        return prices
+        for (i in startIndex until endIndex) {
+            val line = lines[i].trim()
+            if (line.isNotBlank()) {
+
+                // Prüfen, ob die Zeile *nur* aus Zahlen (inkl. Punkt, Komma, Leerzeichen) und einem optionalen Minuszeichen besteht
+                val isOnlyNumbers = line.matches(Regex("""^[\d.,\s-]+$"""))
+
+                if (isOnlyNumbers) {
+                    prices.add(line)
+                    Log.d("TextProcessor", "Prices: '$line'")
+                    continue
+                }
+
+                // Bereinige den Produktnamen, indem wir die " 1" entfernen
+                val cleanedProductName = line.replace(Regex("""\s\d+$"""), "")
+
+                // Füge bereinigten Produktnamen zur Liste hinzu, aber setze den Preis noch als "0"
+                productList.add(Pair(cleanedProductName, "0"))
+            }
+        }
+
+        val cleanedPrices = prices
+            .map { it.replace(Regex("""\s\d+$"""), "") }
+            .filter { it.contains(".") } // nur Preise mit Dezimalpunkt behalten
+
+        Log.d("TextProcessor Cleaned Prices", cleanedPrices.toString())
+
+        for (i in 0 until productList.size) {
+            val product = productList[i]
+            val priceString = cleanedPrices[i]
+            val priceDouble = priceString.toDoubleOrNull() ?: 0.0
+            val roundedPrice = roundToNearest5Rappen(priceDouble)
+            productList[i] = product.copy(second = String.format("%.2f", roundedPrice))  // falls du 2 Nachkommastellen willst
+            Log.d("TextProcessor", "Produkt: '${product.first}' → Preis: '$roundedPrice'")
+        }
+
+        Log.d("TextProcessor", "✅ Erkannte Produkte: $productList")
+        return productList
+    }
+
+    fun roundToNearest5Rappen(amount: Double): Double {
+        return (amount / 0.05).roundToInt() * 0.05
     }
 
     fun levenshtein(a: String, b: String): Int {
@@ -154,6 +123,34 @@ object TextProcessor {
         }
         return dp[a.length][b.length]
     }
+
+    fun getStoreName(text: String): String {
+        val storeNames = listOf("migros", "cumulus", "cumulusnummer")
+        val threshold = 4  // Etwas enger, da einzelne Wörter verglichen werden
+
+        // Durchlaufe jede Zeile
+        text.lines().forEach { line ->
+            // Entferne Bindestriche und Punkte, aber behalte Leerzeichen
+            val cleanedLine = line.replace(Regex("[-.]"), "").lowercase(Locale.ROOT)
+
+            // Zerlege die Zeile in Wörter
+            val words = cleanedLine.split(Regex("\\s+"))
+
+            for (word in words) {
+                for (store in storeNames) {
+                    val distance = levenshtein(word, store)
+                    //Log.d("TextProcessor StoreName", "Distanz zwischen '$word' und '$store' = $distance")
+
+                    if (distance <= threshold) {
+                        return "Migros"
+                    }
+                }
+            }
+        }
+
+        return "Unbekannt"
+    }
+
 
 
 

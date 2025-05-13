@@ -1,6 +1,7 @@
 package com.example.quittungsscanner.data.receipt
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quittungsscanner.data.database.Product
@@ -22,13 +23,33 @@ class ReceiptViewModel @Inject constructor(
     private val receiptDao: ReceiptDao,
     private val productDao: ProductDao
 ) : ViewModel() {
+
+    fun getStoreName(text: String): String {
+        val storeName = TextProcessor.getStoreName(text)
+        return storeName
+    }
+
     private val _products = MutableStateFlow<List<Pair<String, String>>>(emptyList())
     val products: StateFlow<List<Pair<String, String>>> get() = _products
 
     fun processReceiptText(text: String) {
         Log.d("ReceiptViewModel", "Verarbeite Text: $text") // <-- Log hinzufügen
         val productPairs = TextProcessor.extractProducts(text)
+        Log.d("ReceiptViewModel", "Erkannte Produkte: ${productPairs.joinToString { "${it.first} - ${it.second}" }}")
         _products.value = productPairs
+    }
+
+    fun addProduct(name: String, price: String) {
+        val newProduct = name to price
+        _products.update { current ->
+            current.toMutableList().apply {
+                add(newProduct)
+            }
+        }
+    }
+
+    fun deleteProduct(product: Pair<String, String>) {
+        _products.update { it.toMutableList().apply { remove(product) } }
     }
 
     fun updateProduct(index: Int, name: String, price: String) {
