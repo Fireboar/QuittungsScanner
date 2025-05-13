@@ -1,13 +1,17 @@
 package com.example.quittungsscanner.data.receipt
 
+import android.annotation.SuppressLint
 import android.util.Log
 import java.util.Locale
 import kotlin.math.absoluteValue
 import kotlin.math.log
+import kotlin.math.roundToInt
 
 object TextProcessor {
 
+    @SuppressLint("DefaultLocale")
     fun extractProducts(text: String): List<Pair<String, String>> {
+        Log.d("TextProcessor Text", text)
         val lines = text.lines()
         val productList = mutableListOf<Pair<String, String>>()
         val prices = mutableListOf<String>()
@@ -37,7 +41,7 @@ object TextProcessor {
 
         // Wenn kein Startwort → leer zurückgeben
         if (startIndex == -1) {
-            Log.d("ReceiptScreen Products", "❌ Kein Startwort gefunden")
+            Log.d("TextProcessor", "❌ Kein Startwort gefunden")
             return emptyList()
         }
 
@@ -53,7 +57,7 @@ object TextProcessor {
 
             if (matchedEndWord != null) {
                 endIndex = i
-                Log.d("ReceiptScreen Products", "✅ Endwort erkannt: '$matchedEndWord' in Zeile $i: '$originalLine'")
+                Log.d("TextProcessor", "✅ Endwort erkannt: '$matchedEndWord' in Zeile $i: '$originalLine'")
                 break
             }
         }
@@ -65,13 +69,9 @@ object TextProcessor {
                 // Prüfen, ob die Zeile *nur* aus Zahlen (inkl. Punkt, Komma, Leerzeichen) und einem optionalen Minuszeichen besteht
                 val isOnlyNumbers = line.matches(Regex("""^[\d.,\s-]+$"""))
 
-                // Extrahiere Zahlen (inkl. möglichem Minuszeichen)
-                val numberRegex = Regex("""-?\d+[.,]?\d*""")
-                val foundNumbers = numberRegex.findAll(line).map { it.value.toDoubleOrNull() }.filterNotNull().toList()
-
                 if (isOnlyNumbers) {
                     prices.add(line)
-                    Log.d("ReceiptScreen Products", "Prices: '$line'")
+                    Log.d("TextProcessor", "Prices: '$line'")
                     continue
                 }
 
@@ -83,20 +83,28 @@ object TextProcessor {
             }
         }
 
-        val minPriceCount = minOf(prices.size, productList.size, productList.size) // Sicherstellen, dass nicht mehr als 4 Preise zugewiesen werden
-        val cleanedPrices = prices.map { it.replace(Regex("""\s\d+$"""), "") }
+        val cleanedPrices = prices
+            .map { it.replace(Regex("""\s\d+$"""), "") }
+            .filter { it.contains(".") } // nur Preise mit Dezimalpunkt behalten
 
-        for (i in 0 until minPriceCount) {
+        Log.d("TextProcessor Cleaned Prices", cleanedPrices.toString())
+
+        for (i in 0 until productList.size) {
             val product = productList[i]
-            val price = cleanedPrices[i]
-            productList[i] = product.copy(second = price)
-            Log.d("ReceiptScreen Products", "Produkt: '${product.first}' → Preis: '$price'")
+            val priceString = cleanedPrices[i]
+            val priceDouble = priceString.toDoubleOrNull() ?: 0.0
+            val roundedPrice = roundToNearest5Rappen(priceDouble)
+            productList[i] = product.copy(second = String.format("%.2f", roundedPrice))  // falls du 2 Nachkommastellen willst
+            Log.d("TextProcessor", "Produkt: '${product.first}' → Preis: '$roundedPrice'")
         }
 
-        Log.d("ReceiptScreen Products", "✅ Erkannte Produktzeilen: $productList")
+        Log.d("TextProcessor", "✅ Erkannte Produkte: $productList")
         return productList
     }
 
+    fun roundToNearest5Rappen(amount: Double): Double {
+        return (amount / 0.05).roundToInt() * 0.05
+    }
 
     fun levenshtein(a: String, b: String): Int {
         val dp = Array(a.length + 1) { IntArray(b.length + 1) }
@@ -131,7 +139,7 @@ object TextProcessor {
             for (word in words) {
                 for (store in storeNames) {
                     val distance = levenshtein(word, store)
-                    Log.d("StoreName Check", "Distanz zwischen '$word' und '$store' = $distance")
+                    //Log.d("TextProcessor StoreName", "Distanz zwischen '$word' und '$store' = $distance")
 
                     if (distance <= threshold) {
                         return "Migros"

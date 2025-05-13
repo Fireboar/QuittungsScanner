@@ -38,6 +38,8 @@ class ReceiptViewModel @Inject constructor(
         _products.value = productPairs
     }
 
+
+
     fun updateProduct(index: Int, name: String, price: String) {
         _products.update { current ->
             current.toMutableList().apply {

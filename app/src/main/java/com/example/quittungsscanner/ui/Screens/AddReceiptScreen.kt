@@ -59,7 +59,7 @@ fun AddReceiptScreen(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val text = result.data?.getStringExtra("recognized_text") ?: ""
-            Log.d("UI_RECEIVED_TEXT", "Text empfangen: $text")  // <-- Hier prüfen
+            Log.d("UI_RECEIVED_TEXT", "Text empfangen: $text")
             viewModel.processReceiptText(text)
             storeName = viewModel.getStoreName(text)
         }
