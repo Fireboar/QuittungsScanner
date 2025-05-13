@@ -1,6 +1,7 @@
 package com.example.quittungsscanner.data.receipt
 
 import android.util.Log
+import kotlin.math.absoluteValue
 
 object TextProcessor {
 
@@ -20,7 +21,7 @@ object TextProcessor {
             }
         }
 
-        Log.d("ReceiptScreen Products", productPairs.toString())
+        Log.d("ReceiptScreen", productPairs.toString())
 
         return productPairs
     }
@@ -29,56 +30,81 @@ object TextProcessor {
         val lines = text.lines()
         val productLines = mutableListOf<String>()
 
-        var startIndex = -1
-        var endIndex = -1
-
         // Suchbegriffe
         val targetStart = "artikelbezeichnung"
-        val targetEnd = "total chf"
-        val possibleEndWords = listOf("total chf", "sie sparen total", "total", "total in eur")
+        val possibleEndWords = listOf("total chf", "sie sparen total", "total", "total in eur", "rundungsvorteil")
 
         // Levenshtein-Toleranzen
         val maxStartDistance = 4
-        val maxEndDistance = 6
+        val maxEndDistance = 3
 
-        // Zeile für Zeile analysieren
+        var startIndex = -1
+        var endIndex = lines.size  // Standardmäßig bis zum Ende
+
+        // 1. STARTWORT finden
         for ((i, line) in lines.withIndex()) {
             val cleanedLine = line.lowercase().replace("[^a-z]".toRegex(), "")
-
             val startMatch = Regex("artikel[bsz]e?zeich(n|n?u|nu?g|ung)?", RegexOption.IGNORE_CASE).containsMatchIn(line)
-            val fuzzyStartMatch = levenshtein(cleanedLine, targetStart) <= maxStartDistance
+            val fuzzyStartMatch = levenshtein(cleanedLine, targetStart.replace(" ", "")) <= maxStartDistance
 
-            if (startIndex == -1 && (startMatch || fuzzyStartMatch)) {
-                startIndex = i + 1
-                continue
-            }
-
-            if (startIndex != -1) {
-                val isFuzzyEndMatch = possibleEndWords.any {
-                    levenshtein(cleanedLine, it.replace(" ", "")) <= maxEndDistance
-                }
-                if (isFuzzyEndMatch) {
-                    endIndex = i
-                    break
-                }
+            if (startMatch || fuzzyStartMatch) {
+                startIndex = i + 1  // Produkte beginnen nach der Startzeile
+                break
             }
         }
 
-        if (startIndex == -1 || endIndex == -1 || endIndex <= startIndex) {
-            Log.d("ReceiptScreen Names", "Start oder Ende nicht erkannt oder ungültig")
+        // Wenn kein Startwort → leer zurückgeben
+        if (startIndex == -1) {
+            Log.d("ReceiptScreen Products", "❌ Kein Startwort gefunden")
             return emptyList()
         }
 
-        // Zwischen Start- und Endzeile extrahieren
-        for (i in startIndex until endIndex) {
-            val cleanLine = lines[i].trim()
-            if (cleanLine.isNotEmpty() && cleanLine.any { it.isLetter() }) {
-                val lineWithoutNumbers = cleanLine.replace(Regex("\\d+"), "")
-                productLines.add(lineWithoutNumbers.trim())
+        // 2. ENDWORT suchen **nach** dem Startwort
+        for (i in startIndex until lines.size) {
+            val originalLine = lines[i]
+            val cleanedLine = originalLine.lowercase().replace("[^a-z]".toRegex(), "")
+
+            val matchedEndWord = possibleEndWords.firstOrNull {
+                val distance = levenshtein(cleanedLine, it.replace(" ", ""))
+                distance <= maxEndDistance
+            }
+
+            if (matchedEndWord != null) {
+                endIndex = i
+                Log.d("ReceiptScreen Products", "✅ Endwort erkannt: '$matchedEndWord' in Zeile $i: '$originalLine'")
+                break
             }
         }
 
-        Log.d("ReceiptScreen Names", productLines.toString())
+        for (i in startIndex until endIndex) {
+            val line = lines[i].trim()
+            if (line.isNotBlank()) {
+
+                // Prüfen, ob die Zeile *nur* aus Zahlen (inkl. Punkt, Komma, Leerzeichen) und einem optionalen Minuszeichen besteht
+                val isOnlyNumbers = line.matches(Regex("""^[\d.,\s-]+$"""))
+
+                // Extrahiere Zahlen (inkl. möglichem Minuszeichen)
+                val numberRegex = Regex("""-?\d+[.,]?\d*""")
+                val foundNumbers = numberRegex.findAll(line).map { it.value.toDoubleOrNull() }.filterNotNull().toList()
+
+                // Prüfen, ob eine Zahl kleiner als 0.1 oder negativ ist
+                val hasInvalidPrice = foundNumbers.any { it.absoluteValue < 0.1 }
+
+                if (isOnlyNumbers || hasInvalidPrice) {
+                    Log.d("ReceiptScreen Products", "⏭️ Überspringe ungültige oder zu kleine Zahlenzeile: '$line'")
+                    continue
+                }
+
+                productLines.add(line)
+
+                Log.d("ReceiptScreen Products", "📦 Zeile: '$line' → Gefundene Zahlen: $foundNumbers")
+            }
+        }
+
+
+        Log.d("ReceiptScreen Products", "✅ Erkannte Produktzeilen: $productLines")
+
+
         return productLines
     }
 

@@ -28,6 +28,7 @@ class ReceiptViewModel @Inject constructor(
     fun processReceiptText(text: String) {
         Log.d("ReceiptViewModel", "Verarbeite Text: $text") // <-- Log hinzufügen
         val productPairs = TextProcessor.extractProducts(text)
+        Log.d("ReceiptViewModel", "Erkannte Produkte: ${productPairs.joinToString { "${it.first} - ${it.second}" }}")
         _products.value = productPairs
     }
 
