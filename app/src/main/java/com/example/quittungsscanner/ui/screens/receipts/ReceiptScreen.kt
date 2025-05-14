@@ -1,26 +1,34 @@
 package com.example.quittungsscanner.ui.screens.receipts
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,7 +37,7 @@ import androidx.navigation.NavController
 import com.example.quittungsscanner.data.database.ReceiptWithProducts
 import com.example.quittungsscanner.data.scanner.ReceiptViewModel
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 @Composable
 fun ReceiptScreen(
@@ -38,8 +46,12 @@ fun ReceiptScreen(
 ) {
     val receipts by viewModel.receipts.collectAsState()
 
+    // Zustand für das Popup
+    val showDeleteDialog = remember { mutableStateOf(false) }
+    val receiptToDelete = remember { mutableStateOf<ReceiptWithProducts?>(null) }
+
     // Lade Belege beim ersten Öffnen
-    LaunchedEffect(Unit) {
+    LaunchedEffect(receipts) {
         viewModel.loadReceipts()
     }
 
@@ -51,39 +63,131 @@ fun ReceiptScreen(
             Text("Noch keine Belege gespeichert.")
         } else {
             LazyColumn {
-                items(receipts.reversed()) { receiptWithProducts ->
-                    ReceiptCard(navController, receiptWithProducts)
-                    Spacer(modifier = Modifier.height(12.dp))
+                items(receipts.reversed(), key = { it.receipt.id }) { receiptWithProducts ->
+
+                    // Row für die Card und die Icons nebeneinander
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // Linke Spalte: ReceiptCard
+                        Column(modifier = Modifier.weight(1f)) {
+                            ReceiptCard(navController,receiptWithProducts)
+                        }
+
+                        // Rechte Spalte: Icons untereinander
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Bearbeiten Icon
+                            IconButton(
+                                onClick = {
+                                    navController.navigate("editReceipt/${receiptWithProducts.receipt.id}")
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Bearbeiten",
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp)) // Abstand zwischen den Icons
+
+                            // Löschen Icon
+                            IconButton(
+                                onClick = {
+                                    // Zeige das Dialogfenster und setze das zu löschende Element
+                                    receiptToDelete.value = receiptWithProducts
+                                    showDeleteDialog.value = true
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Löschen",
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp)) // Abstand zwischen den Zeilen
                 }
             }
         }
     }
+
+    // Dialog für Bestätigung des Löschens
+    if (showDeleteDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog.value = false // Schließe den Dialog, wenn außerhalb geklickt wird
+            },
+            title = {
+                Text(text = "Beleg löschen?")
+            },
+            text = {
+                Text("Bist du sicher, dass du diesen Beleg löschen möchtest?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // Hier führst du die Löschaktion aus
+                        val receipt = receiptToDelete.value
+                        receipt?.let {
+                            viewModel.deleteReceipt(it.receipt.id)
+                        }
+                        showDeleteDialog.value = false // Schließe den Dialog
+                    }
+                ) {
+                    Text("Löschen")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showDeleteDialog.value = false // Schließe den Dialog
+                    }
+                ) {
+                    Text("Abbrechen")
+                }
+            }
+        )
+    }
 }
 
+
 @Composable
-fun ReceiptCard(
-    navController: NavController,
-    receiptWithProducts: ReceiptWithProducts
-) {
+fun ReceiptCard(navController: NavController, receiptWithProducts: ReceiptWithProducts) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        modifier = Modifier.fillMaxWidth()
+            .clickable {
+                // Navigation zur Edit-Seite mit der ID des Belegs
+                navController.navigate("editReceipt/${receiptWithProducts.receipt.id}")
+            }
     ) {
-        Row(
+        // Column für die gesamte Card
+        Column(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
+                .padding(12.dp)
+                .fillMaxSize()
         ) {
-            // Linke Seite: Store, Datum, Produkte
-            Column(modifier = Modifier.weight(1.5f)) {
+            // Zeile für Geschäftsname (links) und Datum (rechts)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(receiptWithProducts.receipt.storeName, style = MaterialTheme.typography.titleMedium)
                 val dateFormat = SimpleDateFormat("dd.MM.yy, HH:mm", Locale.getDefault())
                 val formattedDate = dateFormat.format(receiptWithProducts.receipt.dateCreated)
+                Text(formattedDate, style = MaterialTheme.typography.bodyMedium)
+            }
 
-                Text(receiptWithProducts.receipt.storeName, style = MaterialTheme.typography.titleMedium)
-                Text("Datum: $formattedDate", style = MaterialTheme.typography.bodyMedium)
-                Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp)) // Abstand zwischen Geschäftsname und Produkte
 
-                Text("Produkte:", style = MaterialTheme.typography.bodyMedium)
+            // Zeile für Produkte
+            Column {
+                //Text("Produkte:", style = MaterialTheme.typography.bodyMedium)
                 receiptWithProducts.products.take(2).forEach { product ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -91,7 +195,7 @@ fun ReceiptCard(
                     ) {
                         Text(
                             text = product.name,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
                             text = "%.2f CHF".format(product.price),
@@ -104,29 +208,18 @@ fun ReceiptCard(
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.weight(1f)) // Flexibler Platz, der den Rest des Platzes einnimmt
 
-            // Rechte Seite: Summe und Button
-            Column(
-                modifier = Modifier.fillMaxHeight(),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.End
+            // Zeile für Summe am unteren Rand
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Oben: Summe
-                Text("Summe:", style = MaterialTheme.typography.bodyMedium)
+                Text("Summe", style = MaterialTheme.typography.titleMedium)
                 val totalPrice = receiptWithProducts.products.sumOf { it.price }
                 Text("%.2f CHF".format(totalPrice), style = MaterialTheme.typography.titleMedium)
-
-                // Unten: Button
-                Button(onClick = {
-                    navController.navigate("editReceipt/${receiptWithProducts.receipt.id}")
-                }) {
-                    Text("bearbeiten")
-                }
-
             }
         }
     }
 }
-
 

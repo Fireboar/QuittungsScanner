@@ -100,13 +100,6 @@ class ReceiptViewModel @Inject constructor(
         }
     }
 
-    fun updateProduct(updatedProduct: Product) {
-        viewModelScope.launch {
-            productDao.updateProduct(updatedProduct)
-            loadReceipts()
-        }
-    }
-
     private val _receiptWithProducts = MutableStateFlow<ReceiptWithProducts?>(null)
     val receiptWithProducts: StateFlow<ReceiptWithProducts?> get() = _receiptWithProducts
 
@@ -144,6 +137,13 @@ class ReceiptViewModel @Inject constructor(
                 }
             }
             productDao.insertProducts(*newProducts.toTypedArray())
+            loadReceipts()
+        }
+    }
+
+    fun deleteReceipt(id: Long) {
+        viewModelScope.launch {
+            receiptDao.deleteReceiptById(id)
             loadReceipts()
         }
     }

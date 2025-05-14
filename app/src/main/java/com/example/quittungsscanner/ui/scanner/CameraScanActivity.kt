@@ -16,6 +16,8 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +26,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,10 +35,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.quittungsscanner.data.scanner.TextProcessor.levenshtein
+import com.example.quittungsscanner.ui.theme.QuittungsScannerTheme
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
@@ -66,7 +72,9 @@ class CameraScanActivity : ComponentActivity() {
 
         // ContentView mit Compose UI anstelle einer XML-Datei
         setContent {
-            CameraScanScreen()
+            QuittungsScannerTheme {
+                CameraScanScreen()
+            }
         }
     }
 
@@ -140,10 +148,22 @@ class CameraScanActivity : ComponentActivity() {
 
     @Composable
     fun CameraScanScreen() {
+
+        val backgroundColor = if (isSystemInDarkTheme()) {
+            0xFF1c1b1f.toInt()
+        } else {
+            ContextCompat.getColor(this, android.R.color.background_light)  // Standard hellere Hintergrundfarbe
+        }
+
+        window.decorView.setBackgroundColor(backgroundColor)
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.background // Standard Hintergrundfarbe für das aktuelle Theme
+                )
         ) {
             // Kamera-Vorschau
             AndroidView(
@@ -202,7 +222,9 @@ class CameraScanActivity : ComponentActivity() {
 
                         finish()
                     }
-                }) {
+                },
+                    colors = ButtonDefaults.buttonColors())
+                {
                     Text("Stop Scan")
                 }
                 TestReceiptButton()

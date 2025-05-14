@@ -210,8 +210,6 @@ fun EditReceiptScreen(
                 onClick = {
                     receiptWithProducts?.receipt?.let { oldReceipt ->
                         val updatedReceipt = oldReceipt.copy(storeName = storeName)
-
-
                         viewModel.updateReceipt(updatedReceipt)
                         navController.popBackStack()
                     }

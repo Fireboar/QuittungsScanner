@@ -41,9 +41,9 @@ fun BottomNavigation(
     NavigationBar{
         items.forEachIndexed {index, item ->
             val text = when (item.title) {
-                "addReceipt" -> "Quittung hinzufügen"
-                "editReceipt" -> "Quittung bearbeiten"
-                "Receipts" -> "Quittungen"
+                "addReceipt" -> "Beleg hinzufügen"
+                "editReceipt" -> "Beleg bearbeiten"
+                "Receipts" -> "Belege"
                 else -> item.title
             }
 
