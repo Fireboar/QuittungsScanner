@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -113,6 +114,8 @@ fun AddReceiptScreen(
 
             ProductList(snackbarHostState,storeName,navController,coroutineScope)
 
+
+
         }
     }
 }
@@ -127,6 +130,8 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
     // Zustand für die Eingabefelder
     var newName by remember { mutableStateOf("") }
     var newPrice by remember { mutableStateOf("") }
+
+    val isLoading by remember { mutableStateOf(viewModel.isLoading) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -213,6 +218,21 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
                     ) {
                         Icon(imageVector = Icons.Filled.Add, contentDescription = "Produkt hinzufügen",
                             modifier = Modifier.size(30.dp))
+                    }
+                }
+            }
+
+            item{
+                // Ladeanzeige, wenn isLoading true ist
+                if (isLoading) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Kategorisiere Beleg...")
                     }
                 }
             }

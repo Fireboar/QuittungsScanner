@@ -77,10 +77,7 @@ fun ReceiptScreen(
                 "09" to "September", "10" to "Oktober", "11" to "November", "12" to "Dezember"
             )
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 DropdownSelector(
                     label = "Jahr",

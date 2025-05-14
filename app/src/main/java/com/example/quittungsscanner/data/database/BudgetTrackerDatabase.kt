@@ -61,6 +61,7 @@ interface ProductDao {
 
     @Update
     suspend fun updateProduct(product: Product)
+
 }
 
 @Entity(
@@ -88,7 +89,8 @@ data class Product(
     val id: Long = 0,
     val name: String,
     val price: Double,
-    val receiptId: Long
+    val receiptId: Long,
+    val category: String
 )
 
 data class ReceiptWithProducts(
