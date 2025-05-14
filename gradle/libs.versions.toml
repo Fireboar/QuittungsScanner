@@ -1,4 +1,5 @@
 [versions]
+accompanistCharts = "0.31.1-alpha"
 agp = "8.8.0"
 androidscannerdemo = "2.1.1"
 androidscannerdemoVersion = "1.0.5"
@@ -7,7 +8,10 @@ cameraCamera2 = "1.4.2"
 cameraLifecycle = "1.1.0"
 cameraView = "1.1.0"
 cameraViewVersion = "1.0.0"
+charts = "pies"
+chartsVersion = "pies-1.0.0-alpha01"
 coil = "3.0.4"
+converterGson = "2.9.0"
 documentScanner = "16.0.0-beta3"
 githubAndroidscannerdemo = "master-SNAPSHOT"
 googleTextRecognition = "17.0.0"
@@ -47,6 +51,7 @@ visionTextRecognition = "16.0.0"
 
 
 [libraries]
+accompanist-charts = { module = "com.google.accompanist:accompanist-charts", version.ref = "accompanistCharts" }
 androidscannerdemo = { module = "com.github.jhansireddy:AndroidScannerDemo", version.ref = "androidscannerdemo" }
 androidscannerdemo-v105 = { module = "com.github.jhansireddy:AndroidScannerDemo", version.ref = "androidscannerdemoVersion" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityCompose" }
@@ -59,8 +64,10 @@ androidx-camera-view-v100 = { module = "androidx.camera:camera-view", version.re
 androidx-camera-view-v110 = { module = "androidx.camera:camera-view", version.ref = "cameraView" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+charts = { module = "com.github.tehras:charts", version.ref = "charts" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 document-scanner = { module = "com.google.mlkit:document-scanner", version.ref = "documentScanner" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -93,6 +100,7 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito" }
 scanbot-sdk-ocr = { module = "io.scanbot.sdk:scanbot-sdk-ocr", version.ref = "scanbotSdkOcr" }
 suddendevelopment-androidscannerdemo = { module = "com.github.SuddenDevelopment:AndroidScannerDemo", version.ref = "githubAndroidscannerdemo" }
+tehras-charts = { module = "com.github.tehras:Charts", version.ref = "chartsVersion" }
 tess-two = { module = "com.rmtheis:tess-two", version.ref = "tessTwo" }
 tesseract-android = { module = "com.googlecode.tesseract.android:tesseract-android", version.ref = "tesseractAndroid" }
 text-recognition = { module = "com.google.mlkit:text-recognition", version.ref = "textRecognition" }

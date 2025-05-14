@@ -88,4 +88,7 @@ dependencies {
     implementation (libs.androidx.camera.lifecycle.v110)
     implementation (libs.androidx.camera.view.v110)
     implementation (libs.androidx.camera.view.v100)
+
+    //Json
+    implementation (libs.converter.gson)
 }

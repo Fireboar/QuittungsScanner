@@ -11,9 +11,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.quittungsscanner.ui.screens.receipts.AddReceiptScreen
 import com.example.quittungsscanner.ui.screens.receipts.ReceiptSavedScreen
-import com.example.quittungsscanner.ui.screens.AuswertungenScreen
+import com.example.quittungsscanner.ui.screens.auswertungen.AuswertungenScreen
 import com.example.quittungsscanner.ui.screens.receipts.EditReceiptScreen
-import com.example.quittungsscanner.ui.screens.HomeScreen
+import com.example.quittungsscanner.ui.screens.auswertungen.HomeScreen
 import com.example.quittungsscanner.ui.screens.ProfileScreen
 import com.example.quittungsscanner.ui.screens.receipts.ReceiptScreen
 import com.example.quittungsscanner.ui.screens.Screens
