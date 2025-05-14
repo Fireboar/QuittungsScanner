@@ -1,4 +1,4 @@
-package com.example.quittungsscanner.ui.Screens
+package com.example.quittungsscanner.ui.screens.receipts
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.quittungsscanner.data.database.ReceiptWithProducts
-import com.example.quittungsscanner.data.receipt.ReceiptViewModel
+import com.example.quittungsscanner.data.scanner.ReceiptViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 

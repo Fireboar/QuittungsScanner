@@ -1,4 +1,4 @@
-package com.example.quittungsscanner.ui.Screens
+package com.example.quittungsscanner.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

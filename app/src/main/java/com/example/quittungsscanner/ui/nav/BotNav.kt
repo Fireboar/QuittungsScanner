@@ -1,4 +1,4 @@
-package com.example.quittungsscanner.ui.Bars
+package com.example.quittungsscanner.ui.nav
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Badge
@@ -36,8 +36,17 @@ fun BottomNavigation(
 ){
     var selectedItem by remember {mutableIntStateOf(0)}
 
+
+
     NavigationBar{
         items.forEachIndexed {index, item ->
+            val text = when (item.title) {
+                "addReceipt" -> "Quittung hinzufügen"
+                "editReceipt" -> "Quittung bearbeiten"
+                "Receipts" -> "Quittungen"
+                else -> item.title
+            }
+
             NavigationBarItem(
                 selected = index == selectedItem,
                 onClick = {
@@ -49,7 +58,7 @@ fun BottomNavigation(
                 },
                 label = {
                     Text(
-                        text = if (item.title == "AddQuittung") "Quittung Hinzufügen" else item.title,
+                        text = text,
                         maxLines = 1,
                         softWrap = false
                     )

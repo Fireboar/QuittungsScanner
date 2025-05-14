@@ -1,10 +1,8 @@
-package com.example.quittungsscanner.data.receipt
+package com.example.quittungsscanner.data.scanner
 
 import android.annotation.SuppressLint
 import android.util.Log
 import java.util.Locale
-import kotlin.math.absoluteValue
-import kotlin.math.log
 import kotlin.math.roundToInt
 
 object TextProcessor {

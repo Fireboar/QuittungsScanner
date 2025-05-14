@@ -22,10 +22,11 @@ import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.example.quittungsscanner.ui.Bars.BottomNavigation
-import com.example.quittungsscanner.ui.Bars.BottomNavigationItem
-import com.example.quittungsscanner.ui.Bars.CustomTopBar
-import com.example.quittungsscanner.ui.Screens.Screens
+import com.example.quittungsscanner.ui.nav.BottomNavigation
+import com.example.quittungsscanner.ui.nav.BottomNavigationItem
+import com.example.quittungsscanner.ui.nav.CustomTopBar
+import com.example.quittungsscanner.ui.nav.MyNavHost
+import com.example.quittungsscanner.ui.screens.Screens
 import com.example.quittungsscanner.ui.theme.QuittungsScannerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -68,15 +69,15 @@ class MainActivity : ComponentActivity() {
                         hasNews = false,
                     ),
                     BottomNavigationItem(
-                        route = Screens.AddQuittung.name,
-                        title = Screens.AddQuittung.name,
+                        route = Screens.addReceipt.name,
+                        title = Screens.addReceipt.name,
                         selectedIcon = Icons.Filled.Add,
                         unselectedIcon = Icons.Outlined.Add,
                         hasNews = false,
                     ),
                     BottomNavigationItem(
-                        route = Screens.Quittungen.name,
-                        title = Screens.Quittungen.name,
+                        route = Screens.Receipts.name,
+                        title = Screens.Receipts.name,
                         selectedIcon = Icons.Filled.Receipt,
                         unselectedIcon = Icons.Outlined.Receipt,
                         hasNews = false,

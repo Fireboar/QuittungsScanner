@@ -1,4 +1,4 @@
-package com.example.quittungsscanner.ui.Bars
+package com.example.quittungsscanner.ui.nav
 
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
@@ -24,10 +24,17 @@ fun CustomTopBar(navController: NavController) {
     val screenName = currentRoute?.substringBefore("/") ?: "Unknown Screen"
     val context = LocalContext.current
 
+    val text = when (screenName) {
+        "addReceipt" -> "Quittung hinzufügen"
+        "editReceipt" -> "Quittung bearbeiten"
+        "Receipts" -> "Quittungen"
+        else -> screenName
+    }
+
     TopAppBar(
         title = {
             Text(
-                text = if (screenName == "AddQuittung") "Quittung Hinzufügen" else screenName,
+                text = text,
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White
             )

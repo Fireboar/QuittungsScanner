@@ -1,4 +1,4 @@
-package com.example.quittungsscanner
+package com.example.quittungsscanner.ui.nav
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -9,14 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.quittungsscanner.ui.Screens.AddReceiptScreen
-import com.example.quittungsscanner.ui.Screens.ReceiptSavedScreen
-import com.example.quittungsscanner.ui.Screens.AuswertungenScreen
-import com.example.quittungsscanner.ui.Screens.EditReceiptScreen
-import com.example.quittungsscanner.ui.Screens.HomeScreen
-import com.example.quittungsscanner.ui.Screens.ProfileScreen
-import com.example.quittungsscanner.ui.Screens.ReceiptScreen
-import com.example.quittungsscanner.ui.Screens.Screens
+import com.example.quittungsscanner.ui.screens.receipts.AddReceiptScreen
+import com.example.quittungsscanner.ui.screens.receipts.ReceiptSavedScreen
+import com.example.quittungsscanner.ui.screens.AuswertungenScreen
+import com.example.quittungsscanner.ui.screens.receipts.EditReceiptScreen
+import com.example.quittungsscanner.ui.screens.HomeScreen
+import com.example.quittungsscanner.ui.screens.ProfileScreen
+import com.example.quittungsscanner.ui.screens.receipts.ReceiptScreen
+import com.example.quittungsscanner.ui.screens.Screens
 
 @Composable
 fun MyNavHost(
@@ -41,12 +41,12 @@ fun MyNavHost(
             AuswertungenScreen()
         }
         composable(
-            route = Screens.AddQuittung.name,
+            route = Screens.addReceipt.name,
         ) {
             AddReceiptScreen(navHostController)
         }
         composable(
-            route = Screens.Quittungen.name,
+            route = Screens.Receipts.name,
         ) {
             ReceiptScreen(navHostController)
         }

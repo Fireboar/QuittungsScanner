@@ -1,7 +1,6 @@
-package com.example.quittungsscanner.data.receipt
+package com.example.quittungsscanner.data.scanner
 
 import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quittungsscanner.data.database.Product
@@ -52,6 +51,15 @@ class ReceiptViewModel @Inject constructor(
         _products.update { it.toMutableList().apply { remove(product) } }
     }
 
+    fun deleteProduct(index: Int) {
+        _products.update { current ->
+            val updatedList = current.toMutableList()
+            updatedList.removeAt(index)
+            updatedList
+        }
+        Log.d("edit", "Deleted product at index $index")
+    }
+
     fun updateProduct(index: Int, name: String, price: String) {
         _products.update { current ->
             current.toMutableList().apply {
@@ -99,17 +107,44 @@ class ReceiptViewModel @Inject constructor(
         }
     }
 
-    suspend fun getProductById(productId: Long): Product? {
-        return productDao.getProductById(productId)
-    }
-
     private val _receiptWithProducts = MutableStateFlow<ReceiptWithProducts?>(null)
     val receiptWithProducts: StateFlow<ReceiptWithProducts?> get() = _receiptWithProducts
 
     fun getReceiptWithProducts(receiptId: Long) {
         viewModelScope.launch {
+            // Fetch the ReceiptWithProducts by its ID
             val result = receiptDao.getReceiptsWithProducts().find { it.receipt.id == receiptId }
-            _receiptWithProducts.value = result
+
+            // If the result is not null, update the products list
+            result?.let {
+                // Map products into a Pair of name and price as Strings
+                val productPairs = it.products.map { product ->
+                    product.name to product.price.toString()
+                }
+
+                // Update the _products StateFlow with the new list of products
+                _products.value = productPairs
+
+                // Optionally, update _receiptWithProducts if needed
+                _receiptWithProducts.value = it
+            }
+        }
+    }
+
+    fun updateReceipt(receipt: Receipt) {
+        viewModelScope.launch {
+            receiptDao.updateReceipt(receipt)
+            val oldProducts = productDao.getProductsByReceipt(receipt.id)
+            oldProducts.forEach { product ->
+                productDao.deleteProductById(product.id)
+            }
+            val newProducts = _products.value.mapNotNull { (name, priceStr) ->
+                priceStr.toDoubleOrNull()?.let { price ->
+                    Product(name = name, price = price, receiptId = receipt.id)
+                }
+            }
+            productDao.insertProducts(*newProducts.toTypedArray())
+            loadReceipts()
         }
     }
 }
