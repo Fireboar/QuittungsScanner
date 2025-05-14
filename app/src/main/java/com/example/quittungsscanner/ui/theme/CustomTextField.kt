@@ -33,26 +33,27 @@ fun CustomTextField(
 
     Column(modifier = modifier) {
         // Label anzeigen
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-            color = MyPrimaryTextColor
-        )
-
-        Spacer(modifier = Modifier.height(4.dp)) // Abstand zwischen Label und TextField
-
+        if (label.isNotEmpty()) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(4.dp)) // Abstand zwischen Label und TextField
+        } else {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
         // Das eigentliche TextField
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
                 .border(1.dp, borderColor, RoundedCornerShape(8.dp))
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             textStyle = TextStyle(
-                fontSize = 14.sp,
-                color = MyPrimaryTextColor
+                fontSize = 24.sp,
+                color = MaterialTheme.colorScheme.onSurface
             ),
             singleLine = true
         )

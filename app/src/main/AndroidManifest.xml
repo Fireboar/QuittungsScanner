@@ -43,7 +43,7 @@
         </activity>
 
         <activity
-            android:name="com.example.quittungsscanner.data.receipt.CameraScanActivity"
+            android:name="com.example.quittungsscanner.ui.scanner.CameraScanActivity"
             android:theme="@style/Theme.AppCompat.Light">
         </activity>
     </application>

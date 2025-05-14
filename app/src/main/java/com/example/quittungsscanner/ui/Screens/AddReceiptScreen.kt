@@ -9,10 +9,10 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,7 +34,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -46,7 +46,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.navigation.NavController
-import com.example.quittungsscanner.data.receipt.CameraScanActivity
+import com.example.quittungsscanner.ui.scanner.CameraScanActivity
 import com.example.quittungsscanner.data.receipt.ReceiptViewModel
 import com.example.quittungsscanner.ui.theme.CustomTextField
 import kotlinx.coroutines.CoroutineScope
@@ -105,7 +105,7 @@ fun AddReceiptScreen(
                 label = "Store/Laden",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+                    .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
             )
 
             ProductList(snackbarHostState,storeName,navController,coroutineScope)
@@ -129,7 +129,7 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
-                .padding(bottom = 8.dp)
+                .padding(bottom = 0.dp)
         ) {
             itemsIndexed(products) { index, product ->
                 val name = product.first
@@ -138,7 +138,7 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                        .padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -147,7 +147,7 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
                         onValueChange = {
                             viewModel.updateProduct(index, it, price)
                         },
-                        label = "",
+                        label = if (index == 0) "Produktname" else "",
                         modifier = Modifier.weight(1f)
                     )
 
@@ -158,7 +158,7 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
                         onValueChange = {
                             viewModel.updateProduct(index, name, it)
                         },
-                        label = "",
+                        label = if (index == 0) "Preis" else "",
                         modifier = Modifier.width(100.dp)
                     )
 
@@ -166,8 +166,10 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
 
                     IconButton(onClick = {
                         viewModel.deleteProduct(product)
-                    }) {
-                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Löschen")
+                    }, modifier = Modifier.padding(top = if (index == 0) 18.dp else 8.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Löschen",
+                                modifier = Modifier.size(30.dp))
                     }
                 }
             }
@@ -205,8 +207,11 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
                     newName = ""
                     newPrice = ""
                 }
-            }) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = "Produkt hinzufügen")
+            },
+            modifier = Modifier.padding(top = 20.dp)
+            ) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "Produkt hinzufügen",
+                    modifier = Modifier.size(30.dp))
             }
 
         }
@@ -240,9 +245,6 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
         }
     }
 }
-
-
-
 
 
 @Composable
