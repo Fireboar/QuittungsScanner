@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.quittungsscanner.data.database.ReceiptWithProducts
 import com.example.quittungsscanner.data.scanner.ReceiptViewModel
+import com.example.quittungsscanner.ui.theme.DropdownSelector
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -45,6 +47,10 @@ fun ReceiptScreen(
     viewModel: ReceiptViewModel = hiltViewModel()
 ) {
     val receipts by viewModel.receipts.collectAsState()
+
+    //Dropdown
+    val selectedYear = remember { mutableStateOf<String?>(null) }
+    val selectedMonth = remember { mutableStateOf<String?>(null) }
 
     // Zustand für das Popup
     val showDeleteDialog = remember { mutableStateOf(false) }
@@ -62,13 +68,47 @@ fun ReceiptScreen(
         if (receipts.isEmpty()) {
             Text("Noch keine Belege gespeichert.")
         } else {
+            val years = receipts.map {
+                SimpleDateFormat("yyyy", Locale.getDefault()).format(it.receipt.dateCreated)
+            }.distinct().map { it to it }
+            val months = listOf(
+                "01" to "Januar", "02" to "Februar", "03" to "März", "04" to "April",
+                "05" to "Mai", "06" to "Juni", "07" to "Juli", "08" to "August",
+                "09" to "September", "10" to "Oktober", "11" to "November", "12" to "Dezember"
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                DropdownSelector(
+                    label = "Jahr",
+                    options = years,
+                    selectedOption = selectedYear.value,
+                    onOptionSelected = { selectedYear.value = it }
+                )
+                DropdownSelector(
+                    label = "Monat",
+                    options = months.map { it.first to it.second },
+                    selectedOption = selectedMonth.value,
+                    onOptionSelected = { selectedMonth.value = it }
+                )
+            }
             LazyColumn {
-                items(receipts.reversed(), key = { it.receipt.id }) { receiptWithProducts ->
+                val filteredReceipts = receipts.filter {
+                    val year = SimpleDateFormat("yyyy", Locale.getDefault()).format(it.receipt.dateCreated)
+                    val month = SimpleDateFormat("MM", Locale.getDefault()).format(it.receipt.dateCreated)
+                    (selectedYear.value == null || selectedYear.value == year) &&
+                            (selectedMonth.value == null || selectedMonth.value == month)
+                }
+                items(filteredReceipts.reversed(), key = { it.receipt.id }) { receiptWithProducts ->
 
                     // Row für die Card und die Icons nebeneinander
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Linke Spalte: ReceiptCard
                         Column(modifier = Modifier.weight(1f)) {
@@ -77,22 +117,9 @@ fun ReceiptScreen(
 
                         // Rechte Spalte: Icons untereinander
                         Column(
+                            Modifier.fillMaxHeight(),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // Bearbeiten Icon
-                            IconButton(
-                                onClick = {
-                                    navController.navigate("editReceipt/${receiptWithProducts.receipt.id}")
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Bearbeiten",
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(8.dp)) // Abstand zwischen den Icons
-
                             // Löschen Icon
                             IconButton(
                                 onClick = {

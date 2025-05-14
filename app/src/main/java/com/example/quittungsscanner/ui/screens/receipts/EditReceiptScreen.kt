@@ -100,7 +100,7 @@ fun EditReceiptScreen(
             storeName = storeName,
             onStoreNameChange = { storeName = it },
             modifier = Modifier
-                .padding(16.dp)
+                .padding(9.dp)
                 .width(300.dp)
         )
 
@@ -145,7 +145,7 @@ fun EditReceiptScreen(
                     IconButton(
                         onClick = {
                             viewModel.deleteProduct(product)
-                        }, modifier = Modifier.padding(top = if (index == 0) 18.dp else 8.dp)
+                        }, modifier = Modifier.padding(top = if (index == 0) 22.dp else 0.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete, contentDescription = "Löschen",
@@ -154,51 +154,51 @@ fun EditReceiptScreen(
                     }
                 }
             }
-        }
 
-        // Eingabefelder für das Hinzufügen eines Produkts
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp)
-        ) {
-            CustomTextField(
-                value = newName,
-                onValueChange = { newName = it },
-                label = "Produktname",
-                modifier = Modifier.weight(1f)
-            )
+            // ➕ Eingabefeld als letztes Element in der Liste
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CustomTextField(
+                        value = newName,
+                        onValueChange = { newName = it },
+                        label = "",
+                        modifier = Modifier.weight(1f)
+                    )
 
-            Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
-            CustomTextField(
-                value = newPrice,
-                onValueChange = { newPrice = it },
-                label = "Preis",
-                modifier = Modifier.width(100.dp)
-            )
+                    CustomTextField(
+                        value = newPrice,
+                        onValueChange = { newPrice = it },
+                        label = "",
+                        modifier = Modifier.width(100.dp)
+                    )
 
-            Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
-            IconButton(
-                onClick = {
-                    // Produkt hinzufügen, wenn beide Felder ausgefüllt sind
-                    if (newName.isNotBlank() && newPrice.isNotBlank()) {
-                        viewModel.addProduct(newName, newPrice)
-                        // Nach dem Hinzufügen die Eingabefelder zurücksetzen
-                        newName = ""
-                        newPrice = ""
+                    IconButton(
+                        onClick = {
+                            if (newName.isNotBlank() && newPrice.isNotBlank()) {
+                                viewModel.addProduct(newName, newPrice)
+                                newName = ""
+                                newPrice = ""
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add, contentDescription = "Produkt hinzufügen",
+                            modifier = Modifier.size(30.dp)
+                        )
                     }
-                },
-                modifier = Modifier.padding(top = 20.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add, contentDescription = "Produkt hinzufügen",
-                    modifier = Modifier.size(30.dp)
-                )
+                }
             }
-
         }
+
 
         Row(
             modifier = Modifier
