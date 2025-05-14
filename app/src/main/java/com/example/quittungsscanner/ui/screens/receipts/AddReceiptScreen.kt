@@ -49,6 +49,7 @@ import com.example.quittungsscanner.ui.scanner.CameraScanActivity
 import com.example.quittungsscanner.data.scanner.ReceiptViewModel
 import com.example.quittungsscanner.ui.screens.Screens
 import com.example.quittungsscanner.ui.theme.CustomTextField
+import com.example.quittungsscanner.ui.theme.EditableStoreDropdown
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -99,13 +100,15 @@ fun AddReceiptScreen(
                 }
             }
 
-            CustomTextField(
-                value = storeName,
-                onValueChange = { storeName = it },
-                label = "Geschäftsname",
+            val allStores = listOf("Migros", "Coop", "Galaxus", "Aldi", "Lidl", "Spar")
+
+            EditableStoreDropdown(
+                storeOptions = allStores,
+                storeName = storeName,
+                onStoreNameChange = { storeName = it },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
+                    .padding(16.dp)
+                    .width(300.dp)
             )
 
             ProductList(snackbarHostState,storeName,navController,coroutineScope)

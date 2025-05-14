@@ -39,6 +39,7 @@ import com.example.quittungsscanner.data.scanner.ReceiptViewModel
 import com.example.quittungsscanner.data.database.Product
 import com.example.quittungsscanner.ui.screens.Screens
 import com.example.quittungsscanner.ui.theme.CustomTextField
+import com.example.quittungsscanner.ui.theme.EditableStoreDropdown
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -92,13 +93,15 @@ fun EditReceiptScreen(
             Text(formattedDate, style = MaterialTheme.typography.bodyMedium)
         }
 
-        CustomTextField(
-            value = storeName,
-            onValueChange = { storeName = it },
-            label = "",
+        val allStores = listOf("Migros", "Coop", "Galaxus", "Aldi", "Lidl", "Spar")
+
+        EditableStoreDropdown(
+            storeOptions = allStores,
+            storeName = storeName,
+            onStoreNameChange = { storeName = it },
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp, start = 8.dp, end = 8.dp)
+                .padding(16.dp)
+                .width(300.dp)
         )
 
         LazyColumn(

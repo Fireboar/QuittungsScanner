@@ -152,7 +152,7 @@ class CameraScanActivity : ComponentActivity() {
         val backgroundColor = if (isSystemInDarkTheme()) {
             0xFF1c1b1f.toInt()
         } else {
-            ContextCompat.getColor(this, android.R.color.background_light)  // Standard hellere Hintergrundfarbe
+            ContextCompat.getColor(this, android.R.color.background_light)
         }
 
         window.decorView.setBackgroundColor(backgroundColor)
@@ -162,7 +162,7 @@ class CameraScanActivity : ComponentActivity() {
                 .fillMaxSize()
                 .padding(16.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.background // Standard Hintergrundfarbe für das aktuelle Theme
+                    color = MaterialTheme.colorScheme.background
                 )
         ) {
             // Kamera-Vorschau
@@ -175,7 +175,7 @@ class CameraScanActivity : ComponentActivity() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(400.dp)
-                    .align(Alignment.TopCenter)
+                    .padding(top = 100.dp)
             )
 
             // UI-Buttons unten anzeigen
