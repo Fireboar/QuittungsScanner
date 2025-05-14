@@ -15,7 +15,7 @@ fun ProfileScreen() {
     Box(modifier = Modifier.padding(20.dp)) {
         Column {
             AsyncImage(
-                model = "https://preview.redd.it/mxzes0dktbib1.jpg?auto=webp&s=6a42caedf2a33c316d93fcc8b399724c6a08282d",
+                model = "",
                 modifier = Modifier.height(height = 200.dp),
                 contentDescription = "null"
             )

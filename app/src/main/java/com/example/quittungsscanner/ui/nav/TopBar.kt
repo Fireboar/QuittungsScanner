@@ -25,9 +25,9 @@ fun CustomTopBar(navController: NavController) {
     val context = LocalContext.current
 
     val text = when (screenName) {
-        "addReceipt" -> "Quittung hinzufügen"
-        "editReceipt" -> "Quittung bearbeiten"
-        "Receipts" -> "Quittungen"
+        "addReceipt" -> "Beleg hinzufügen"
+        "editReceipt" -> "Beleg bearbeiten"
+        "Receipts" -> "Belege"
         else -> screenName
     }
 
