@@ -37,6 +37,9 @@ interface ReceiptDao {
 
     @Query("DELETE FROM receipts WHERE id = :receiptId")
     suspend fun deleteReceiptById(receiptId: Long)
+
+    @Update
+    suspend fun updateReceipt(receipt: Receipt)
 }
 
 @Dao

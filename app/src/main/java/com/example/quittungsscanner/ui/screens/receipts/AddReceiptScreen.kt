@@ -1,4 +1,4 @@
-package com.example.quittungsscanner.ui.Screens
+package com.example.quittungsscanner.ui.screens.receipts
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -47,7 +46,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.navigation.NavController
 import com.example.quittungsscanner.ui.scanner.CameraScanActivity
-import com.example.quittungsscanner.data.receipt.ReceiptViewModel
+import com.example.quittungsscanner.data.scanner.ReceiptViewModel
+import com.example.quittungsscanner.ui.screens.Screens
 import com.example.quittungsscanner.ui.theme.CustomTextField
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -102,7 +102,7 @@ fun AddReceiptScreen(
             CustomTextField(
                 value = storeName,
                 onValueChange = { storeName = it },
-                label = "Store/Laden",
+                label = "Geschäftsname",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
@@ -264,7 +264,7 @@ fun ReceiptSavedScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(onClick = {
-            navController.navigate(Screens.AddQuittung.name) {
+            navController.navigate(Screens.addReceipt.name) {
                 popUpTo("add_receipt") { inclusive = true } // verhindert Zurück zu diesem Screen
             }
         }) {
