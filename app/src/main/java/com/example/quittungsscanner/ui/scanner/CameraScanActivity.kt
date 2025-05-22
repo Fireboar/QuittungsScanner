@@ -60,15 +60,15 @@ class CameraScanActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Berechtigungen prüfen und Kamera starten
+        // Initialize camera executor
+        cameraExecutor = Executors.newSingleThreadExecutor()
+
+        // Check permissions and start camera
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera()
         } else {
             requestPermissions(arrayOf(android.Manifest.permission.CAMERA), 1001)
         }
-
-        // Executor für die Bildanalyse
-        cameraExecutor = Executors.newSingleThreadExecutor()
 
         // ContentView mit Compose UI anstelle einer XML-Datei
         setContent {
@@ -350,11 +350,11 @@ class CameraScanActivity : ComponentActivity() {
     """.trimIndent()
     }
 
-
-
-
     override fun onDestroy() {
         super.onDestroy()
-        cameraExecutor.shutdown()  // Kamera-Executor schließen
+        // Clean up resources
+        cameraExecutor.shutdown()
+        recognizedTexts.clear()
+        camera?.cameraControl?.enableTorch(false)
     }
 }

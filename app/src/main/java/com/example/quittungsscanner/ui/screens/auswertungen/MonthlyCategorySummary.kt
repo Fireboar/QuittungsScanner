@@ -16,10 +16,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quittungsscanner.data.scanner.ReceiptViewModel
+import com.example.quittungsscanner.ui.components.ChartColors
 import com.example.quittungsscanner.ui.theme.PieChartDataEntry
 import com.example.quittungsscanner.ui.theme.SimplePieChart
 
@@ -42,16 +42,13 @@ fun MonthlyCategorySummary(
             category to totalPrice
         }
 
-    val pieColors = listOf(
-        Color(0xFFEF5350), Color(0xFFAB47BC), Color(0xFF42A5F5),
-        Color(0xFF26A69A), Color(0xFFFFCA28), Color(0xFFA1887F),
-        Color(0xFF90A4AE)
-    )
+    // Generate dynamic colors based on the number of categories
+    val colors = ChartColors.generateColors(categorySummaries.size)
 
     val pieEntries = categorySummaries.mapIndexed { index, (category, total) ->
         PieChartDataEntry(
             value = total.toFloat(),
-            color = pieColors[index % pieColors.size],
+            color = colors[index],
             label = category
         )
     }
@@ -72,15 +69,13 @@ fun MonthlyCategorySummary(
                     .width(250.dp)
                     .height(250.dp)
                     .aspectRatio(1f),
-
-                )
+            )
         }
-
 
         // Legende anzeigen
         Column(modifier = Modifier.padding(vertical = 8.dp)) {
             pieEntries.forEach { entry ->
-                Row(verticalAlignment = Alignment.CenterVertically) { // Korrektur hier
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     // Farbiger Kreis für die Legende
                     Canvas(modifier = Modifier
                         .size(16.dp)

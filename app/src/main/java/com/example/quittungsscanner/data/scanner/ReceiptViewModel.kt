@@ -194,14 +194,27 @@ class ReceiptViewModel @Inject constructor(
         viewModelScope.launch {
             receiptDao.updateReceipt(receipt)
             val oldProducts = productDao.getProductsByReceipt(receipt.id)
+            
+            // Create a map of product names to their categories
+            val categoryMap = oldProducts.associate { it.name to it.category }
+            
+            // Delete old products
             oldProducts.forEach { product ->
                 productDao.deleteProductById(product.id)
             }
+            
+            // Create new products with preserved categories
             val newProducts = _products.value.mapNotNull { (name, priceStr) ->
                 priceStr.toDoubleOrNull()?.let { price ->
-                    Product(name = name, price = price, receiptId = receipt.id, category = "")
+                    Product(
+                        name = name,
+                        price = price,
+                        receiptId = receipt.id,
+                        category = categoryMap[name] ?: "Unbekannt" // Use existing category or "Unbekannt"
+                    )
                 }
             }
+            
             productDao.insertProducts(*newProducts.toTypedArray())
             loadReceipts()
         }
