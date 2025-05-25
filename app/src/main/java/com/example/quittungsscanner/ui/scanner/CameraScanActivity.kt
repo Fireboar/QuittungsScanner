@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
@@ -115,7 +116,8 @@ fun CameraScanScreen(cameraExecutor: ExecutorService, onResult: (String) -> Unit
     var recognizedText by remember { mutableStateOf("") }
     val recognizedTexts = remember { mutableStateListOf<String>() }
 
-    var previewView by remember { mutableStateOf<PreviewView?>(null) }
+    var previewView = remember { PreviewView(context) }
+    var camera by remember {mutableStateOf<Camera?>(null)}
     var cameraProvider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
 
     // Initialize camera provider
@@ -126,34 +128,36 @@ fun CameraScanScreen(cameraExecutor: ExecutorService, onResult: (String) -> Unit
     // Bind/unbind CameraX when previewView or isScanning changes
     DisposableEffect(previewView, cameraProvider, isScanning) {
         val provider = cameraProvider
-        val view = previewView
-        if (provider != null && view != null && isScanning) {
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(view.surfaceProvider)
-            }
-            val imageAnalysis = ImageAnalysis.Builder().build().also { analysis ->
-                analysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    if (isScanning) {
-                        analyzeImage(imageProxy,
-                            onTextRecognized = { text ->
-                                recognizedText = text
-                                recognizedTexts.add(text)
-                                Log.d("OCR", "Erkannter Text: $text")
-                            },
-                            onImageClosed = { imageProxy.close() }
-                        )
-                    } else {
-                        imageProxy.close()
+        if (provider != null) {
+            if (isScanning) {
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                val preview = Preview.Builder().build().also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
+                }
+                val imageAnalysis = ImageAnalysis.Builder().build().also { analysis ->
+                    analysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                        if (isScanning) {
+                            analyzeImage(imageProxy,
+                                onTextRecognized = { text ->
+                                    recognizedText = text
+                                    recognizedTexts.add(text)
+                                    Log.d("OCR", "Erkannter Text: $text")
+                                },
+                                onImageClosed = { imageProxy.close() }
+                            )
+                        } else {
+                            imageProxy.close()
+                        }
                     }
                 }
+                provider.unbindAll()
+                provider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalysis)
+            } else {
+                provider.unbindAll()
+                camera = null
             }
-            provider.unbindAll()
-            provider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalysis)
         }
-        onDispose {
-            cameraProvider?.unbindAll()
-        }
+        onDispose { }
     }
 
     Box(
@@ -166,11 +170,7 @@ fun CameraScanScreen(cameraExecutor: ExecutorService, onResult: (String) -> Unit
     ) {
         // Kamera-Vorschau
         AndroidView(
-            factory = { context ->
-                PreviewView(context).also {
-                    previewView = it
-                }
-            },
+            factory = { previewView },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(400.dp)
@@ -198,6 +198,7 @@ fun CameraScanScreen(cameraExecutor: ExecutorService, onResult: (String) -> Unit
             Button(onClick = {
                 if (isScanning) {
                     isScanning = false
+                    camera?.cameraControl?.enableTorch(false)
 
                     Toast.makeText(context, "Scan gestoppt", Toast.LENGTH_SHORT).show()
 

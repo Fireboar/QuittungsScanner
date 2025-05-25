@@ -62,6 +62,9 @@ fun AddReceiptScreen(
     viewModel: ReceiptViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+
+    val isLoading = viewModel.isLoading
+
     var storeName by remember { mutableStateOf("") }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -82,7 +85,7 @@ fun AddReceiptScreen(
         snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) }
     ) {
         Column {
-            Row (Modifier.fillMaxWidth().padding(16.dp), Arrangement.Center){
+            Row (Modifier.fillMaxWidth(), Arrangement.Center) {
                 Button(onClick = {
                     if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
                         != PackageManager.PERMISSION_GRANTED
@@ -96,7 +99,9 @@ fun AddReceiptScreen(
                         val intent = Intent(context, CameraScanActivity::class.java)
                         launcher.launch(intent)
                     }
-                }) {
+                },
+                    enabled = !isLoading
+                ) {
                     Text("Scannen starten")
                 }
             }
@@ -112,16 +117,13 @@ fun AddReceiptScreen(
                     .width(300.dp)
             )
 
-            ProductList(snackbarHostState,storeName,navController,coroutineScope)
-
-
-
+            ProductList(snackbarHostState,storeName,navController,coroutineScope, viewModel.isLoading)
         }
     }
 }
 
 @Composable
-fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navController: NavController, coroutineScope: CoroutineScope, viewModel: ReceiptViewModel = hiltViewModel()) {
+fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navController: NavController, coroutineScope: CoroutineScope, isLoading: Boolean, viewModel: ReceiptViewModel = hiltViewModel()) {
     val products by viewModel.products.collectAsState()
 
     // Gesamtsumme berechnen
@@ -130,8 +132,6 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
     // Zustand für die Eingabefelder
     var newName by remember { mutableStateOf("") }
     var newPrice by remember { mutableStateOf("") }
-
-    val isLoading by remember { mutableStateOf(viewModel.isLoading) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -222,11 +222,11 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
                 }
             }
 
-            item{
+            item {
                 // Ladeanzeige, wenn isLoading true ist
                 if (isLoading) {
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -237,8 +237,6 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
                 }
             }
         }
-
-
 
         Row(
             modifier = Modifier
@@ -262,6 +260,8 @@ fun ProductList(snackbarHostState:SnackbarHostState,storeName:String, navControl
                         }
                     }
                 },
+
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Beleg speichern")

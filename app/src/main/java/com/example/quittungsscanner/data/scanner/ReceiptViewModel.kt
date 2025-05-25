@@ -15,12 +15,13 @@ import com.example.quittungsscanner.data.database.ReceiptWithProducts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
 import java.util.Calendar
 import java.util.Date
 import javax.inject.Inject
@@ -31,6 +32,8 @@ class ReceiptViewModel @Inject constructor(
     private val receiptDao: ReceiptDao,
     private val productDao: ProductDao
 ) : ViewModel() {
+
+    var isLoading by mutableStateOf(false)
 
     fun getStoreName(text: String): String {
         val storeName = TextProcessor.getStoreName(text)
@@ -47,6 +50,59 @@ class ReceiptViewModel @Inject constructor(
         _products.value = productPairs
     }
 
+    fun saveReceiptToDatabase(storeName: String, onSaved: () -> Unit) {
+        viewModelScope.launch {
+            isLoading = true
+            // Die Funktion wird jetzt asynchron ausgeführt
+
+            withContext(Dispatchers.IO) {
+                try {
+                    val receipt = Receipt(
+                        dateCreated = Date(),
+                        storeName = storeName
+                    )
+                    val receiptId = receiptDao.insertReceipt(receipt)
+
+                    // Concurrent category loading
+                    val productEntities: List<Product> = coroutineScope {
+                        _products.value.map { (name, priceStr) ->
+                            async(Dispatchers.IO) {
+                                val price = priceStr.toDoubleOrNull() ?: 0.0
+                                val category = try {
+                                    getProductCategory(name)
+                                } catch (e: Exception) {
+                                    Log.e("ReceiptVM", "Kategorie-Lookup failed for $name", e)
+                                    "Unbekannt"
+                                }
+                                Product(name = name, price = price, receiptId = receiptId, category = category)
+                            }
+                        }.awaitAll()  // suspend until *all* lookups are done
+                    }
+
+
+                    // Einfügen aller Produkte auf einmal
+                    val insertedIds = productDao.insertProducts(*productEntities.toTypedArray())
+
+                    // Log zur Kontrolle
+                    Log.d(
+                        "ReceiptViewModel",
+                        "Inserted receipt ID: $receiptId, product IDs: $insertedIds"
+                    )
+
+                    // Rückmeldung an die UI
+                    withContext(Dispatchers.Main) {
+                        onSaved()
+                    }
+                } catch (e: Exception) {
+                    // Fehlerbehandlung, wenn etwas schief geht
+                    Log.e("ReceiptViewModel", "Fehler beim Speichern des Belegs: ${e.message}")
+                }
+            }
+
+            isLoading = false
+        }
+    }
+
     fun addProduct(name: String, price: String) {
         val newProduct = name to price
         _products.update { current ->
@@ -58,15 +114,6 @@ class ReceiptViewModel @Inject constructor(
 
     fun deleteProduct(product: Pair<String, String>) {
         _products.update { it.toMutableList().apply { remove(product) } }
-    }
-
-    fun deleteProduct(index: Int) {
-        _products.update { current ->
-            val updatedList = current.toMutableList()
-            updatedList.removeAt(index)
-            updatedList
-        }
-        Log.d("edit", "Deleted product at index $index")
     }
 
     fun updateProduct(index: Int, name: String, price: String) {
@@ -107,53 +154,6 @@ class ReceiptViewModel @Inject constructor(
         } catch (e: Exception) {
             Log.e("OpenFoodFacts", "Fehler beim Abrufen der Kategorie", e)
             "Unbekannt" // Rückgabe "Unbekannt" im Fehlerfall
-        }
-    }
-
-
-    var isLoading by mutableStateOf(false)
-        private set
-
-    fun saveReceiptToDatabase(storeName: String, onSaved: () -> Unit) {
-        viewModelScope.launch {
-            // Die Funktion wird jetzt asynchron ausgeführt
-            try {
-                isLoading = true
-                val receipt = Receipt(
-                    dateCreated = Date(),
-                    storeName = storeName
-                )
-                val receiptId = receiptDao.insertReceipt(receipt)
-
-                val productEntities = _products.value.mapNotNull { (name, priceStr) ->
-                    priceStr.toDoubleOrNull()?.let { price ->
-                        async {
-                            val category = try {
-                                getProductCategory(name)  // Holen der Kategorie für das Produkt
-                            } catch (e: Exception) {
-                                Log.e("Product", "Fehler beim Abrufen der Kategorie für $name", e)
-                                "Unbekannt"  // Falls ein Fehler auftritt, Kategorie auf "Unbekannt" setzen
-                            }
-                            Product(name = name, price = price, receiptId = receiptId, category = category)
-                        }
-                    }
-                }.map { it.await() }
-
-                // Einfügen aller Produkte auf einmal
-                val insertedIds = productDao.insertProducts(*productEntities.toTypedArray())
-
-                // Log zur Kontrolle
-                Log.d("ReceiptViewModel", "Inserted receipt ID: $receiptId, product IDs: $insertedIds")
-
-                // Rückmeldung an die UI
-                onSaved()
-
-            } catch (e: Exception) {
-                // Fehlerbehandlung, wenn etwas schief geht
-                Log.e("ReceiptViewModel", "Fehler beim Speichern des Belegs: ${e.message}")
-            } finally {
-                isLoading = false
-            }
         }
     }
 
