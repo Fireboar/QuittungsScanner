@@ -36,11 +36,3 @@ fun HomeScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
     }
 }
 
-private fun monthName(month: Int): String {
-    return SimpleDateFormat("MMMM", Locale.GERMAN).format(
-        Calendar.getInstance().apply {
-            set(Calendar.MONTH, month - 1) // Monatsnummer ist 0-basiert, daher -1
-        }.time
-    ).replaceFirstChar { it.uppercase() }
-}
-

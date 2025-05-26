@@ -217,11 +217,11 @@ fun CameraScanScreen(cameraExecutor: ExecutorService, onResult: (String) -> Unit
                 Text("Stop Scan")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            /*Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = { onResult(getDummyReceiptText()) }) {
                 Text("Test-Beleg analysieren")
-            }
+            }*/
 
         }
     }

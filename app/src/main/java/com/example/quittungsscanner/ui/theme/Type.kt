@@ -10,7 +10,7 @@ import com.example.quittungsscanner.R
 
 // Custom Font
 val customFontFamily = FontFamily(
-    Font(R.font.beaufort_for_lol_regular),
+    Font(R.font.beaufort_for_lol_bold),
     Font(R.font.beaufort_for_lol_bold, FontWeight.Bold)
 )
 

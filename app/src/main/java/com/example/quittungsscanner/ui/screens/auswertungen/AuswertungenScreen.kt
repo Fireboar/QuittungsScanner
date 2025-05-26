@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -20,18 +22,22 @@ import java.util.Locale
 
 @Composable
 fun AuswertungenScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
+
+    viewModel.loadAvailableYearMonthPairs()
     val currentDate = remember { Calendar.getInstance() }
-    val yearOptions = (2022..currentDate.get(Calendar.YEAR)).toList().reversed()
-    val monthOptions = (1..12).toList()
+    val yearMonthPairs by viewModel.availableYearMonthPairs.collectAsState()
 
     val selectedYear = remember { mutableIntStateOf(currentDate.get(Calendar.YEAR)) }
     val selectedMonth = remember { mutableIntStateOf(currentDate.get(Calendar.MONTH)) }
+
+    val availableYears = yearMonthPairs.map { it.first }.distinct()
+    val availableMonths = yearMonthPairs.filter { it.first == selectedYear.intValue }.map { it.second }.distinct()
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             DropdownSelector(
                 label = "Jahr",
-                options = yearOptions.map { it.toString() to it.toString() },
+                options = availableYears.map { it.toString() to it.toString() },
                 selectedOption = selectedYear.intValue.toString(),
                 onOptionSelected = {
                     if (it != null) {
@@ -41,7 +47,7 @@ fun AuswertungenScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
             )
             DropdownSelector(
                 label = "Monat",
-                options = monthOptions.map { it.toString() to monthName(it) },
+                options = availableMonths.map { it.toString() to monthName(it) },
                 selectedOption = selectedMonth.intValue.toString(),
                 onOptionSelected = {
                     if (it != null) {
@@ -62,7 +68,7 @@ fun AuswertungenScreen(viewModel: ReceiptViewModel = hiltViewModel()) {
     }
 }
 
-private fun monthName(month: Int): String {
+fun monthName(month: Int): String {
     return SimpleDateFormat("MMMM", Locale.GERMAN).format(
         Calendar.getInstance().apply {
             set(Calendar.MONTH, month)

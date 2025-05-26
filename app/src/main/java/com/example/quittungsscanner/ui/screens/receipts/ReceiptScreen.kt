@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -37,8 +38,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.quittungsscanner.data.database.ReceiptWithProducts
 import com.example.quittungsscanner.data.scanner.ReceiptViewModel
+import com.example.quittungsscanner.ui.screens.auswertungen.monthName
 import com.example.quittungsscanner.ui.theme.DropdownSelector
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 @Composable
@@ -48,9 +51,16 @@ fun ReceiptScreen(
 ) {
     val receipts by viewModel.receipts.collectAsState()
 
-    //Dropdown
-    val selectedYear = remember { mutableStateOf<String?>(null) }
-    val selectedMonth = remember { mutableStateOf<String?>(null) }
+    viewModel.loadAvailableYearMonthPairs()
+    val currentDate = remember { Calendar.getInstance() }
+    val yearMonthPairs by viewModel.availableYearMonthPairs.collectAsState()
+
+    val selectedYear = remember { mutableIntStateOf(currentDate.get(Calendar.YEAR)) }
+    val selectedMonth = remember { mutableIntStateOf(currentDate.get(Calendar.MONTH)) }
+
+    val availableYears = yearMonthPairs.map { it.first }.distinct()
+    val availableMonths = yearMonthPairs.filter { it.first == selectedYear.intValue }.map { it.second }.distinct()
+
 
     // Zustand für das Popup
     val showDeleteDialog = remember { mutableStateOf(false) }
@@ -68,36 +78,39 @@ fun ReceiptScreen(
         if (receipts.isEmpty()) {
             Text("Noch keine Belege gespeichert.")
         } else {
-            val years = receipts.map {
-                SimpleDateFormat("yyyy", Locale.getDefault()).format(it.receipt.dateCreated)
-            }.distinct().map { it to it }
-            val months = listOf(
-                "01" to "Januar", "02" to "Februar", "03" to "März", "04" to "April",
-                "05" to "Mai", "06" to "Juni", "07" to "Juli", "08" to "August",
-                "09" to "September", "10" to "Oktober", "11" to "November", "12" to "Dezember"
-            )
+
             Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 DropdownSelector(
                     label = "Jahr",
-                    options = years,
-                    selectedOption = selectedYear.value,
-                    onOptionSelected = { selectedYear.value = it }
+                    options = availableYears.map { it.toString() to it.toString() },
+                    selectedOption = selectedYear.intValue.toString(),
+                    onOptionSelected = {
+                        if (it != null) {
+                            selectedYear.intValue = it.toInt()
+                        }
+                    }
                 )
                 DropdownSelector(
                     label = "Monat",
-                    options = months.map { it.first to it.second },
-                    selectedOption = selectedMonth.value,
-                    onOptionSelected = { selectedMonth.value = it }
+                    options = availableMonths.map { it.toString() to monthName(it) },
+                    selectedOption = selectedMonth.intValue.toString(),
+                    onOptionSelected = {
+                        if (it != null) {
+                            selectedMonth.intValue = it.toInt()
+                        }
+                    }
                 )
             }
             LazyColumn {
                 val filteredReceipts = receipts.filter {
-                    val year = SimpleDateFormat("yyyy", Locale.getDefault()).format(it.receipt.dateCreated)
-                    val month = SimpleDateFormat("MM", Locale.getDefault()).format(it.receipt.dateCreated)
-                    (selectedYear.value == null || selectedYear.value == year) &&
-                            (selectedMonth.value == null || selectedMonth.value == month)
+                    val cal = Calendar.getInstance().apply { time = it.receipt.dateCreated }
+                    val year = cal.get(Calendar.YEAR)
+                    val month = cal.get(Calendar.MONTH)
+
+                    year == selectedYear.intValue &&
+                            month == selectedMonth.intValue
                 }
                 items(filteredReceipts.reversed(), key = { it.receipt.id }) { receiptWithProducts ->
 

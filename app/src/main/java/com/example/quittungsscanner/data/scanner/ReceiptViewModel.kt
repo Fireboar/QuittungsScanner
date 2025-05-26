@@ -33,6 +33,21 @@ class ReceiptViewModel @Inject constructor(
     private val productDao: ProductDao
 ) : ViewModel() {
 
+    private val _availableYearMonthPairs = MutableStateFlow<List<Pair<Int, Int>>>(emptyList())
+    val availableYearMonthPairs: StateFlow<List<Pair<Int, Int>>> get() = _availableYearMonthPairs
+
+    fun loadAvailableYearMonthPairs() {
+        viewModelScope.launch {
+            val receipts = receiptDao.getReceiptsWithProducts()
+            val yearMonthPairs = receipts.map {
+                val cal = Calendar.getInstance().apply { time = it.receipt.dateCreated }
+                cal.get(Calendar.YEAR) to (cal.get(Calendar.MONTH))
+            }.distinct().sortedByDescending { it.first * 100 + it.second }
+
+            _availableYearMonthPairs.value = yearMonthPairs
+        }
+    }
+
     var isLoading by mutableStateOf(false)
 
     fun getStoreName(text: String): String {
@@ -126,8 +141,20 @@ class ReceiptViewModel @Inject constructor(
 
     suspend fun getProductCategory(productName: String): String {
         return try {
+
+            val cleanedProductName = productName
+                .split(" ") // In Wörter aufteilen
+                .filterNot {
+                    it.equals("bio", ignoreCase = true) ||
+                            it.equals("fairtrade", ignoreCase = true) ||
+                            it.contains(".") // Wörter mit Punkt ausschließen
+                }
+                .joinToString(" ")
+
+            Log.d("cleanedProductName",cleanedProductName)
+
             // API-Aufruf, um Produktdetails zu erhalten
-            val response = openFoodFactsService.searchProduct(productName)
+            val response = openFoodFactsService.searchProduct(cleanedProductName)
 
             // Abrufen des ersten Produkts
             val firstProduct = response.products.firstOrNull()
@@ -136,19 +163,24 @@ class ReceiptViewModel @Inject constructor(
             val keywords = firstProduct?._keywords ?: emptyList()
             val categories = firstProduct?.categories?.split(",") ?: emptyList()
 
-            // Durchsuchen der Keywords und Bestimmen der Kategorie
-            var category: String = when {
-                // Prüfen, ob eines der Keywords auf Lebensmittel hinweist
-                keywords.any { it.contains("lebensmittel", ignoreCase = true) } -> "Lebensmittel"
-                categories.any { it.contains("lebensmittel", ignoreCase = true) } -> "Lebensmittel"
-                // Prüfen, ob eines der Keywords auf Kleidung hinweist
-                keywords.any { it.contains("bekleidung", ignoreCase = true) } -> "Kleidung"
-                categories.any { it.contains("bekleidung", ignoreCase = true) } -> "Kleidung"
-                // Prüfen, ob eines der Keywords auf Elektronik hinweist
-                keywords.any { it.contains("elektronik", ignoreCase = true) } -> "Elektronik"
-                categories.any { it.contains("elektronik", ignoreCase = true) } -> "Elektronik"
+            val lebensmittelKeywords = listOf("lebensmittel")
+            val kleidungKeywords = listOf("kleidung")
+            val elektronikKeywords = listOf("elektronik")
+
+            val category: String = when {
+                keywords.any { word -> lebensmittelKeywords.any { keyword -> word.contains(keyword, ignoreCase = true) } } ||
+                        categories.any { word -> lebensmittelKeywords.any { keyword -> word.contains(keyword, ignoreCase = true) } } -> "Lebensmittel"
+
+                keywords.any { word -> kleidungKeywords.any { keyword -> word.contains(keyword, ignoreCase = true) } } ||
+                        categories.any { word -> kleidungKeywords.any { keyword -> word.contains(keyword, ignoreCase = true) } } -> "Kleidung"
+
+                keywords.any { word -> elektronikKeywords.any { keyword -> word.contains(keyword, ignoreCase = true) } } ||
+                        categories.any { word -> elektronikKeywords.any { keyword -> word.contains(keyword, ignoreCase = true) } } -> "Elektronik"
+
                 else -> "Unbekannt"
             }
+            Log.d("DebugKategorie", "keywords = $keywords")
+            Log.d("DebugKategorie", "categories = $categories")
 
             category // Rückgabe der Kategorie
         } catch (e: Exception) {

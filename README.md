@@ -15,9 +15,9 @@ Eine Android-Anwendung zur digitalen Verwaltung und Analyse von Einkaufsbelegen.
 - **Jetpack Compose**: Moderne UI-Entwicklung
 - **Material Design 3**: UI-Komponenten und Theming
 - **MVVM-Architektur**: ViewModel und State Management
-- **Dependency Injection**: Dagger Hilt
-- **Coroutines**: Asynchrone Programmierung
-- **Flow**: Reaktive Programmierung
+- **Dependency Injection**: Dagger Hilt (Receipt Viewmodel und Datenbank)
+- **Coroutines**: Asynchrone Programmierung (Datenbank, AddReceipt Screen Fehlermeldungen, Viewmodel saveReceiptToDatabase)
+- **Flow**: Reaktive Programmierung (Receipt Viewmodel variables)
 
 ### Datenbank & Persistenz
 - **Room Database**: Lokale Datenspeicherung
@@ -44,37 +44,13 @@ Eine Android-Anwendung zur digitalen Verwaltung und Analyse von Einkaufsbelegen.
 ### Berechtigungen
 - Kamera
 - Internet
-- Benachrichtigungen
 - Externer Speicher (bis API 32)
-- SMS-Lesen
 
 ### Features
 - Beleg-Scanning mit OCR
 - Automatische Produkterkennung
 - Kategorisierung von Produkten
 - Ausgabenanalyse und -visualisierung
-- Benutzerprofilverwaltung
+- Benutzerprofilverwaltung (Nur Vorbereited)
 - Offline-Funktionalität
-- Gamification-Elemente (Level, EXP, Gold)
-
-### Sicherheit
-- Sichere Datenspeicherung
-- Verschlüsselte Kommunikation
-- Berechtigungsmanagement
-
-### Testing
-- JUnit für Unit Tests
-- Espresso für UI Tests
-- Mockito für Mocking
-- Turbine für Flow Testing
-
-## Installation
-
-1. Klonen Sie das Repository
-2. Öffnen Sie das Projekt in Android Studio
-3. Synchronisieren Sie die Gradle-Dateien
-4. Führen Sie die App auf einem Emulator oder physischen Gerät aus
-
-## Lizenz
-
-[Lizenzinformationen hier einfügen] 
+ 
